@@ -2,6 +2,10 @@
 # 14th. March 2020
 # Yuzuru Utsunomiya
 
+# When you use the git, tell the git the following information.
+# git config --global user.email "yuzuru@nagasaki-u.ac.jp"
+# git config --global user.name "Yuzuru Utsunomiya"
+
 
 # ---- read.library ----
 library(tidyverse)
@@ -14,10 +18,18 @@ library(viridisLite)
 ### --- END --- ###
 
 # ---- read.data ----
+# NOTE
+# The names were copied from data read below.
+# Names of province in the Mekong Delta region
 mekong.delta.province.name <- c("An Giang", "Bạc Liêu", "Bến Tre", "Cần Thơ", "Cà Mau", "Đồng Tháp", "Hậu Giang", "Kiên Giang", "Long An", "Sóc Trăng", "Tiền Giang", "Trà Vinh", "Vĩnh Long")
+# GID in the Mekong Delta region
 mekong.delta.province.gid <- c("VNM.1_1", "VNM.2_1", "VNM.6_1", "VNM.12_1", "VNM.13_1", "VNM.18_1", "VNM.24_1", "VNM.33_1", "VNM.39_1", "VNM.51_1", "VNM.58_1", "VNM.59_1", "VNM.61_1")
+# Names of district in the Mekong Delta region
 mekong.delta.district <- c("An Phu", "Cho Moi", "Chau Doc", "Chau Phu", "Chau Thanh", "Long Xuyen", "Phu Tan", "Tinh Bien", "Tan Chau", "Thoai Son", "Tri Ton", "Bac Lieu", "Dong Hai", "Gia Rai", "Hong Dan", "Hoa Binh", "Phuoc Long", "Vinh Loi", "Ben Tre", "Ba Tri", "Binh Dai", "Cho Lach", "Chau Thanh", "Giong Trom", "Mo Cay Bac", "Mo Cay Nam", "Thanh Phu", "Binh Thuy", "Co Do", "Cai Rang", "Ninh Kieu", "O Mon", "Phong Dien", "Thot Not", "Thoi Lai", "Vinh Thanh", "Ca Mau", "Cai Nuoc", "Dam Doi", "Nam Can", "Ngoc Hien", "Phu Tan", "Thoi Binh", "Tran Van Thoi", "U Minh", "Cao Lanh", "Cao Lanh", "Chau Thanh", "Hong Ngu", "Hong Ngu", "Lap Vo", "Lai Vung", "Sa Dec", "Tam Nong", "Tan Hong", "Thanh Binh", "Thap Muoi", "Chau Thanh", "Chau Thanh A", "Long My", "Long My", "Nga Bay", "Phung Hiep", "Vi Thanh", "Vi Thuy", "An Bien", "An Minh", "Chau Thanh", "Giong Rieng", "Giang Thanh", "Go Quao", "Ha Tien", "Hon Dat", "Kien Hai", "Kien Luong", "Phu Quoc", "Rach Gia", "Tan Hiep", "U Minh Thuong", "Vinh Thuan", "Ben Luc", "Can Duoc", "Can Giuoc", "Chau Thanh", "Duc Hoa", "Duc Hue", "Kien Tuong", "Moc Hoa", "Tan An", "Tan Hung", "Tan Thanh", "Tan Tru", "Thanh Hoa", "Thu Thua", "Vinh Hung", "Chau Thanh", "Cu Lao Dung", "Ke Sach", "Long Phu", "My Tu", "My Xuyen", "Nga Nam", "Soc Trang", "Thanh Tri", "Tran De", "Vinh Chau", "Cai Be", "Cai Lay", "Cai Lay", "Cho Gao", "Chau Thanh", "Go Cong", "Go Cong Dong", "Go Cong Tay", "My Tho", "Tan Phu Dong", "Tan Phuoc", "Cau Ke", "Cau Ngang", "Cang Long", "Chau Thanh", "Duyen Hai", "Duyen Hai", "Tieu Can", "Tra Cu", "Tra Vinh", "Binh Minh", "Binh Tan", "Long Ho", "Mang Thit", "Tam Binh", "Tra On", "Vinh Long", "Vung Liem")
 # population in 2017
+# NOTE
+# The population was input manually.MANUALLY!!
+# To merge the data, use the table entitled "data_district_mekong_delta.xlsx".
 mekong.delta.population <- 
   readxl::read_excel("data_district_mekong_delta.xlsx",
                      sheet = "population",
@@ -36,8 +48,6 @@ mekong.delta.map <-
                    by = "GID_1"
                    ) %>% 
   dplyr::mutate(population.density.2017 = as.numeric(as.character(1000000*population.2017 / area)))
-
-# draw a base map by Google
 # provide information of google API key
 source("../scattered_item/map.key.r")
 # center of satellite imagery map
@@ -121,10 +131,4 @@ ggsave("mekong.delta.map.population.density.2017.pdf",
 #
 ##
 ### --- END --- ###
-
-
-
-
-
-
 
