@@ -108,9 +108,6 @@ mrd$sf$NAME_1
 ### END of section --- ###
 ##
 #
-
-
-
 ### ---- population.map ----
 # Preparation
 # 1. Download sf data from GADM ()
