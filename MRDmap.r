@@ -3,18 +3,19 @@
 # 12th. August 2021
 # 14th. August 2021 revised
 
-#### ---- load.library ---- ####
+#### ---- load.objects ---- ####
 # load libraries
-library(GADMTools)
-library(tidyverse)
-library(stringi)
-library(maptools)
 library(countrycode)
-library(sp)
-library(viridis)
-library(khroma)
+library(GADMTools)
+library(ggmap)
 library(ggsn)
-
+library(khroma)
+library(maptools)
+library(osmdata)
+library(sp)
+library(stringr)
+library(tidyverse)
+library(viridis)
 #### ---- load.Vietnam.map ----
 # Load country map with all provinces
 vn_prov_map  <-  
@@ -34,31 +35,31 @@ listNames(vn_prov_map, level = 1)
 #
 
 #### ---- Mekong.delta.map ----
-# Extract provinces in the Mekong River Delta from the list
-mrd  <- 
-  GADMTools::gadm_subset(
-    vn_prov_map, 
-    regions = c(
-      "An Giang",
-      "Bạc Liêu", 
-      "Bến Tre",
-      "Cần Thơ", 
-      "Cà Mau", 
-      "Đồng Tháp",
-      "Hậu Giang", 
-      "Kiên Giang", 
-      "Long An",
-      "Sóc Trăng", 
-      "Tiền Giang", 
-      "Trà Vinh",
-      "Vĩnh Long"
-      )
-    )
-# plot a map the Mekong delta region 
-GADMTools::gadm_plot(mrd) # missing three provinces
-# show the subset of province to make sure whether the filter worked
-mrd$sf$NAME_1
-
+# # Extract provinces in the Mekong River Delta from the list
+# mrd  <- 
+#   GADMTools::gadm_subset(
+#     vn_prov_map, 
+#     regions = c(
+#       "An Giang",
+#       "Bạc Liêu", 
+#       "Bến Tre",
+#       "Cần Thơ", 
+#       "Cà Mau", 
+#       "Đồng Tháp",
+#       "Hậu Giang", 
+#       "Kiên Giang", 
+#       "Long An",
+#       "Sóc Trăng", 
+#       "Tiền Giang", 
+#       "Trà Vinh",
+#       "Vĩnh Long"
+#       )
+#     )
+# # plot a map the Mekong delta region 
+# GADMTools::gadm_plot(mrd) # missing three provinces
+# # show the subset of province to make sure whether the filter worked
+# mrd$sf$NAME_1
+# 
 # NOTE
 # 1. The object named "mrd" composed of four list-type objects; 
 # basedname, sf, level, and has BGND.
@@ -180,7 +181,7 @@ mrd_map <-
   mrd %>% 
   ggplot2::ggplot() +
   geom_sf() +
-  theme_classic
+  theme_classic()
 # obtain population data of the target province
 vn_prov_population_mrd <- 
   vn_prov_population %>% 
@@ -314,3 +315,278 @@ ggsave(
 ### END of section --- ###
 ##
 #
+
+
+#### ---- osm.map ----
+# check features and tags
+# We often use "concealed" tags. In detail, refer to the following pages.
+# Open street map features
+# https://wiki.openstreetmap.org/wiki/Map_features
+# 
+# available_features()
+# available_tags("highway")
+# available_tags("landuse")
+# available_tags("waterway")
+# 
+# obtain boundary box (bb)
+# Normally, we obtain the bb from name(s) of specific place(s) using getbb() function.
+# When we obtain information the Mekong Delta region, such a way was not available.
+# Instead, using sf object, we obtained the boundary box with sf::st_bbbox() and then
+# provide the bb into opq() function.
+mrd_bb <- 
+  mrd %>% sf::st_bbox()
+
+
+# administrative boundaries
+adm <- readRDS("gadm36_VNM_1_sf.rds")
+khm <- readRDS("gadm36_KHM_0_sf.rds")
+
+vnm_ex_mrd <- 
+  adm %>% 
+  dplyr::filter(
+    !(VARNAME_1 %in% mrd_province)
+    ) %>% 
+  sf::st_union() 
+
+mrd_union <- 
+  adm %>% 
+  dplyr::filter(
+    VARNAME_1 %in% mrd_province
+  ) %>% 
+  sf::st_union()
+# 
+# obtain features' data using osmdata()
+# street
+# "Street" refers to small roads excluding motorway and major road.
+streets <- 
+  mrd_bb %>%
+  osmdata::opq() %>%
+  osmdata::add_osm_feature(
+    key = "highway",
+    value = c(
+      "footway", 
+      "residential", 
+      "service", 
+      "track",
+      "residential", 
+      "living_street",
+      "service",
+      "unclassified"
+      )
+    ) %>%
+  osmdata::osmdata_sf()
+streets
+# road
+road <- 
+  mrd_bb %>%
+  osmdata::opq() %>%
+  osmdata::add_osm_feature(
+    key = "highway",
+    value = c(
+      "motorway", 
+      "motorway_junction",
+      "motorway_link",
+      "primary", 
+      "primary_link",
+      "secondary", 
+      "secondary_link",
+      "tertiary",
+      "tertiary_link",
+      "trunk",
+      "trunk_link"
+    )
+  ) %>%
+  osmdata::osmdata_sf()
+road
+# river
+# NOTE
+# The feature, "river", only returns center of rivers. To obtain
+# width / shape of the river use "natural" instead as below.
+river <- 
+  mrd_bb %>%
+  opq()%>%
+  add_osm_feature(
+    key = "waterway", 
+    value = c(
+      "river"
+    )
+  ) %>%
+  osmdata_sf()
+# riverbank (= riverbed)
+# In detail of difference between river and riberbank, refer to the following page.
+# https://wiki.openstreetmap.org/wiki/Rivers
+riverbank <- 
+  mrd_bb %>%
+  opq()%>%
+  add_osm_feature(
+    key = "natural", 
+    value = c(
+      "water"
+    )
+  ) %>%
+  osmdata_sf()
+# canal
+canal <- 
+  mrd_bb %>%
+  opq()%>%
+  add_osm_feature(
+    key = "waterway", 
+    value = c(
+      "canal"
+    )
+  ) %>%
+  osmdata_sf()
+#
+# Draw a multi-layered map
+mdr_multilayer_map <- 
+  ggplot() +
+  geom_sf() +
+  # street
+  geom_sf(
+    data = streets$osm_lines,
+    inherit.aes = FALSE,
+    color = "grey50",
+    size = 0.2,
+    alpha = 1.0
+  ) +
+  # road
+  geom_sf(
+    data = road$osm_lines,
+    inherit.aes = FALSE,
+    color = "orange",
+    size = 0.2,
+    alpha = 1.0
+  ) +
+  # river
+  geom_sf(
+    data = river$osm_lines,
+    inherit.aes = FALSE,
+    color = "steelblue",
+    size = 0.2,
+    alpha = 1.0
+  ) +
+  # riberbed
+  geom_sf(
+    data = riverbank$osm_multipolygons,
+    inherit.aes = FALSE,
+    color = "steelblue",
+    fill = "steelblue",
+    size = 0.2,
+    alpha = 1.0
+  ) +
+  # canal
+  geom_sf(
+    data = canal$osm_lines,
+    inherit.aes = FALSE,
+    color = "steelblue",
+    size = 0.2,
+    alpha = 1.0
+  ) +
+  # province-level administrative boundaries
+  geom_sf(
+    data = adm,
+    inherit.aes = FALSE,
+    fill = NA,
+    color = "black",
+    size = 0.3,
+    alpha = 1.0
+  ) +
+  # administrative boudaries of the Mekong Delta region
+  geom_sf(
+    data = mrd_union,
+    inherit.aes = FALSE,
+    color = "black",
+    fill = NA,
+    size = 0.8,
+    alpha = 1.0
+  ) +
+  # paint Cambodia and northern part of Vietnam in white
+  geom_sf(
+    data = vnm_ex_mrd,
+    inherit.aes = FALSE,
+    color = "black",
+    fill = "white",
+    size = 0.8,
+    alpha = 1.0
+  ) +
+  # paint Cambodia and northern part of Vietnam in white
+  geom_sf(
+    data = khm,
+    inherit.aes = FALSE,
+    color = "black",
+    fill = "white",
+    size = 0.8,
+    alpha = 1.0
+  ) +
+  labs(
+    x = "Longitude",
+    y = "Latitude",
+    caption = "\U00a9 OpenStreetMap contributors"
+  ) +
+  # fix boundary box
+  coord_sf(xlim = c(104.4, 107),
+           ylim = c(8.5, 11.1),
+           expand = FALSE) +
+  theme_classic() +
+  theme(
+    plot.background = element_rect(fill = NA)
+    )
+mdr_multilayer_map
+
+# 
+# save the results
+ggsave(
+  "mdr_multilayer_map.pdf", 
+  plot = mdr_multilayer_map
+  )
+# 
+# add provinces' name, scalebar, and north arrow to the previous map 
+mdr_multilayer_map_02 <- 
+  mdr_multilayer_map +
+  # provinces' name
+  annotate(
+    geom = "label",
+    x = mrd_centroid$center_x,
+    y = mrd_centroid$center_y,
+    label = mrd_centroid$VARNAME_1,
+    size = 3,
+    family = "Times",
+    fill = "white"
+  ) +
+  # scalebar
+  ggsn::scalebar(
+    x.min = 105.4,
+    x.max = 106.4,
+    y.min =8.6,
+    y.max = 8.7,
+    dist = 50, 
+    dist_unit = "km",
+    st.dist = 0.3, 
+    st.size = 3, 
+    height= 0.3, 
+    transform = TRUE
+    ) +
+  # north arrow
+  ggsn::north(
+    x.min = 106.14,
+    x.max = 107.14,
+    y.min =8.53,
+    y.max = 8.73,
+    symbol = 8,
+    scale = 1
+  )
+
+mdr_multilayer_map_02
+
+ggsave(
+  "mdr_multilayer_map_02.pdf", 
+  plot = mdr_multilayer_map_02
+)
+
+#
+##
+### END of section --- ###
+##
+#
+
+
