@@ -40,7 +40,7 @@ mekong.delta.population <-
                 population.2017
                 )
 # read map data and add some valuables
-mekong.delta.map <- 
+mekong.delta.map.district <- 
   base::readRDS("./administrative_boundaries/gadm36_VNM_2_sf.rds") %>% 
   dplyr::filter(GID_1 %in% mekong.delta.province.gid) %>% 
   dplyr::mutate(area = sf::st_area(.)) %>% 
@@ -48,6 +48,12 @@ mekong.delta.map <-
                    by = "GID_1"
                    ) %>% 
   dplyr::mutate(population.density.2017 = as.numeric(as.character(1000000*population.2017 / area)))
+
+mekong.delta.map.province <- 
+  base::readRDS("./administrative_boundaries/gadm36_VNM_1_sf.rds") %>% 
+  dplyr::filter(GID_1 %in% mekong.delta.province.gid) 
+
+
 # provide information of google API key
 source("../scattered_item/map.key.r")
 # center of satellite imagery map
@@ -74,13 +80,20 @@ mekong.delta.map.population.density.2017 <-
   mekong.delta.sat.01 +  
   # coord_sf(crs = st_crs(3857)) + 
   geom_sf(
-    data = mekong.delta.map,
+    data = mekong.delta.map.district,
     aes(fill = population.density.2017
         ),
     colour = "white",
     size = 0.05,
     inherit.aes = FALSE
           ) +
+  geom_sf(
+    data = mekong.delta.map.province,
+    fill = "transparent",
+    colour = "white",
+    size = 0.5,
+    inherit.aes = FALSE
+  ) +
   scale_fill_viridis_c(
     trans = "sqrt",
     option = "plasma",
@@ -92,14 +105,14 @@ mekong.delta.map.population.density.2017 <-
   ylim(8.5, 11) +
   labs(x = "Longitude", 
        y = "Latitude",
-       fill = "Population density \n (Unit: Persons / km^2)",
+       fill = "Population density \n (Persons / km^2)",
        caption = "\U00a9 Google"
   ) +
   theme_classic() +
   theme(
     legend.position = c(0.8,0.2),
     legend.title = element_text(size = 5),
-    legend.text = element_text(size = 8)
+    legend.text = element_text(size = 5)
     ) + 
   # adjust scalebar's preferences
   ggsn::scalebar(x.min = 105.10,
@@ -108,15 +121,15 @@ mekong.delta.map.population.density.2017 <-
                  y.max = 8.60, 
                  dist_unit = "km",
                  dist = 50, 
-                 st.size = 4,
+                 st.size = 3,
                  st.dist = 1.0,
-                 height = 0.5,
+                 height = 1.0,
                  model = "WGS84", 
                  transform = TRUE,
                  location = "bottomright",
-                 box.fill = c("grey30", "white"), # left and right
+                 box.fill = c("black", "white"), # left and right
                  box.color = "white",
-                 st.color = "grey60"
+                 st.color = "black"
   ) 
 #
 ##
