@@ -80,9 +80,43 @@ nlnn_mekong <-
       ~
         # obtain English title from the original table
         .[2,1]
-    ),
-    trait = data.frame(trait = matrix(unlist(trait)))
+    ) ,
+    trait = as.character((unlist(trait)))
   ) %>% 
+  # add trait of each data (Vietnamese)
+  dplyr::mutate(
+    trait_vietnamese = purrr::map(
+      .$rawdata,
+      ~
+        # obtain English title from the original table
+        .[1,1]
+    ),
+    trait_vietnamese = as.character(unlist(trait_vietnamese))
+  ) %>% 
+  # replace / unite name of trait (Vietnamese)
+  dplyr::mutate(
+    # Let us add conditions below accordingly.
+    trait_vietnamese = dplyr::case_when(　　 
+      # production of shrimp aquaculture
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng tôm nuôi") ~ "Sản lượng tôm nuôi", 
+      # production of paddy rice field
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa") ~ "Sản lượng lúa", 
+      TRUE ~ .$trait_vietnamese
+    )
+  )%>% 
+  # replace / unite name of trait (English)
+  # This process depends on the Vietnamese-named traits.
+  # Do the Vietnamese part first!!
+  dplyr::mutate(
+    # Let us add conditions below accordingly.
+    trait = dplyr::case_when(　　 
+      # production of shrimp aquaculture
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng tôm nuôi") ~ "production of shrimp aquaculture", 
+      # production of paddy rice
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa") ~ "production of paddy rice", 
+      TRUE ~ .$trait
+    )
+  )%>% 
   # omit NA trait
   # When the original data does not have any English title,
   # The function above returns NA.
@@ -217,12 +251,39 @@ nlnn_mekong <-
             stringr::str_detect(district, "Cau Ke|Cau Ngang|Cang Long|Chau Thanh|Duyen Hai|Duyen Hai|Tieu Can|Tra Cu|Tra Vinh") ~ "Tra Vinh",
             TRUE ~ "NA"
           )
-        )
+        ) 
       )
+    ) %>% 
+  # 
+  dplyr::mutate(
+    number_row = purrr::map(
+      .$rawdata,
+      ~
+        nrow(.)
+    ) 
+  ) %>% 
+  dplyr::mutate(number_row = as.numeric(unlist(.$number_row)))
+# make a data frame for convenience
+nlnn_mekong_df <- 
+  data.frame(
+    rawdata.df = do.call(function(...) rbind(data.frame(), ...), nlnn_mekong$rawdata),
+    trait_en = rep(nlnn_mekong$trait, times = nlnn_mekong$number_row),
+    trait_vn = rep(nlnn_mekong$trait_vietnamese, times = nlnn_mekong$number_row)
+  ) %>% 
+  data.table::setnames(
+    c(
+      "district",
+      "year",
+      "number",
+      "province",
+      "trait_en",
+      "trait_vn"
     )
-# # Just to confirm the data frame
-# rawdata.df <- do.call(function(...) rbind(data.frame(), ...), nlnn_mekong$rawdata)
-
+  ) %>% 
+  dplyr::as_tibble()
+# save the data frame
+nlnn_mekong_df %>% 
+  readr::write_excel_csv("nlnn_mekong_df.csv")
 #
 ##
 ### END ### ---
