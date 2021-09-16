@@ -99,8 +99,26 @@ nlnn_mekong <-
     trait_vietnamese = dplyr::case_when(　　 
       # production of shrimp aquaculture
       stringr::str_detect(.$trait_vietnamese, "Sản lượng tôm nuôi") ~ "Sản lượng tôm nuôi", 
-      # production of paddy rice field
-      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa") ~ "Sản lượng lúa", 
+      # annual production of paddy rice
+      # Sản lượng lúa cả năm phân theo huyện
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa cả năm phân theo huyện") ~ "Sản lượng lúa cả năm phân theo huyện", 
+      # winter spring paddy: Sản lượng lúa Đông xuân phân theo huyện
+      # NOTE: Some sorts of paddy rice cultivation exist:
+      #   Sản lượng lúa đông xuân phân theo huyện. Thị (BL)
+      #   Sản lượng lúa đông xuân phân theo huyện, thành phố (CM)
+      #   Sản lượng lúa Đông Xuân (KG)
+      #   Sản lượng lúa Đông xuân phân theo huyện, thị (ST)
+      #   Sản lượng lúa Đông xuân (TV)
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa Đông xuân|Sản lượng lúa Đông Xuân|Sản lượng lúa đông xuân") ~ "Sản lượng lúa Đông xuân phân theo huyện", 
+      # summer autumn paddy: Sản lượng lúa Hè thu phân theo huyện
+      # NOTE: Some sorts of paddy rice cultivation exist:
+      #   Sản lượng lúa hè thu phân theo huyện thị (BL)
+      #   (BT)
+      #   Sản lượng lúa hè thu phân theo huyện, thành phố (tấn) (CM) 
+      #   Sản lượng lúa Hè thu (KG)
+      #   Sản lượng lúa Hè thu phân theo huyện, thị (ST) 
+      #   Sản lượng lúa Hè thu (TV) 
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa hè thu|Sản lượng lúa Hè thu") ~ "Sản lượng lúa hè thu phân theo huyện", 
       TRUE ~ .$trait_vietnamese
     )
   )%>% 
@@ -112,8 +130,12 @@ nlnn_mekong <-
     trait = dplyr::case_when(　　 
       # production of shrimp aquaculture
       stringr::str_detect(.$trait_vietnamese, "Sản lượng tôm nuôi") ~ "production of shrimp aquaculture", 
-      # production of paddy rice
-      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa") ~ "production of paddy rice", 
+      # annual production of paddy rice
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa cả năm phân theo huyện") ~ "production of paddy rice", 
+      # winter spring production of paddy rice
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa Đông xuân phân theo huyện") ~ "production of winter spring paddy rice", 
+      # summer autumn production of paddy rice
+      stringr::str_detect(.$trait_vietnamese, "Sản lượng lúa hè thu phân theo huyện") ~ "production of summer autumn paddy rice", 
       TRUE ~ .$trait
     )
   )%>% 
@@ -201,7 +223,7 @@ nlnn_mekong <-
             stringr::str_detect(district, "Phu Tan") ~ "Phu Tan",
             stringr::str_detect(district, "Thoi Binh") ~ "Thoi Binh",
             stringr::str_detect(district, "Tran V. Thoi|Tran Van Thoi") ~ "Tran Van Thoi",
-            stringr::str_detect(district, "U Minh") ~ "U Minh",
+            stringr::str_detect(district, "U Minh rural") ~ "U Minh",
             # Kien Giang
             stringr::str_detect(district, "An Bien|An Biên") ~ "An Bien",
             stringr::str_detect(district, "An Minh|An Minh") ~ "An Minh",
@@ -215,9 +237,9 @@ nlnn_mekong <-
             stringr::str_detect(district, "Phu Quoc|Phú Quốc") ~ "Phu Quoc",
             stringr::str_detect(district, "Rach Gia|Rạch Giá") ~ "Rach Gia",
             stringr::str_detect(district, "Tan Hiep|Tân Hiệp") ~ "Tan Hiep",
-            stringr::str_detect(district, "U Minh Thuong|U Minh Thượng") ~ "U Minh Thuong",
+            stringr::str_detect(district, "U Minh Thượng") ~ "U Minh Thuong",
             stringr::str_detect(district, "Vinh Thuan|Vĩnh Thuận") ~ "Vinh Thuan",
-            stringr::str_detect(district, "Chau Thanh|Châu Thành") ~ "Chau Thanh",
+            stringr::str_detect(district, "Chau Thanh|Huyện Châu Thành") ~ "Chau Thanh",
             # Soc Trang
             stringr::str_detect(district, "Cu Lao Dung") ~ "Cu Lao Dung",
             stringr::str_detect(district, "Ke Sach") ~ "Ke Sach",
@@ -233,25 +255,25 @@ nlnn_mekong <-
             stringr::str_detect(district, "Cau Ke") ~ "Cau Ke",
             stringr::str_detect(district, "Cau Ngang") ~ "Cau Ngang",
             stringr::str_detect(district, "Cang Long") ~ "Cang Long",
-            stringr::str_detect(district, "Chau Thanh") ~ "Chau Thanh",
+            stringr::str_detect(district, "Huyện Châu Thành - Chau Thanh District") ~ "Chau Thanh",
             stringr::str_detect(district, "Duyen Hai") ~ "Duyen Hai",
             stringr::str_detect(district, "Tieu Can") ~ "Tieu Can",
             stringr::str_detect(district, "Tra Cu") ~ "Tra Cu",
             stringr::str_detect(district, "Tra Vinh") ~ "Tra Vinh",
             TRUE ~ "hoge"
           )
-        ) %>% 
-        dplyr::mutate(
-          province = dplyr::case_when(
-            stringr::str_detect(district, "Bac Lieu|Dong Hai|Gia Rai|Hong Dan|Hoa Binh|Phuoc Long|Vinh Loi") ~ "Bac Lieu",
-            stringr::str_detect(district, "Ben Tre|Ba Tri|Binh Dai|Cho Lach|Chau Thanh|Giong Trom|Mo Cay|Mo Cay Bac|Mo Cay Nam|Thanh Phu") ~ "Ben Tre",
-            stringr::str_detect(district, "Ca Mau|Cai Nuoc|Dam Doi|Nam Can|Ngoc Hien|Phu Tan|Thoi Binh|Tran Van Thoi|U Minh") ~ "Ca Mau",
-            stringr::str_detect(district, "An Bien|An Minh|Chau Thanh|Giong Rieng|Giang Thanh|Go Quao|Ha Tien|Hon Dat|Kien Hai|Kien Luong|Phu Quoc|Rach Gia|Tan Hiep|U Minh Thuong|Vinh Thuan") ~ "Kien Giang",
-            stringr::str_detect(district, "Chau Thanh|Cu Lao Dung|Ke Sach|Long Phu|My Tu|My Xuyen|Nga Nam|Soc Trang|Thanh Tri|Tran De|Vinh Chau") ~ "Soc Trang",
-            stringr::str_detect(district, "Cau Ke|Cau Ngang|Cang Long|Chau Thanh|Duyen Hai|Duyen Hai|Tieu Can|Tra Cu|Tra Vinh") ~ "Tra Vinh",
-            TRUE ~ "NA"
-          )
-        ) 
+        # ) %>% 
+        # dplyr::mutate(
+        #   Province = dplyr::case_when(
+        #     stringr::str_detect(district, "Bac Lieu|Dong Hai|Gia Rai|Hong Dan|Hoa Binh|Phuoc Long|Vinh Loi") ~ "Bac Lieu",
+        #     stringr::str_detect(district, "Ben Tre|Ba Tri|Binh Dai|Cho Lach|Chau Thanh (BT)|Giong Trom|Mo Cay|Mo Cay Bac|Mo Cay Nam|Thanh Phu") ~ "Ben Tre",
+        #     stringr::str_detect(district, "Ca Mau|Cai Nuoc|Dam Doi|Nam Can|Ngoc Hien|Phu Tan|Thoi Binh|Tran Van Thoi|(^U Minh$)") ~ "Ca Mau",
+        #     stringr::str_detect(district, "An Bien|An Minh|Chau Thanh (KG)|Giong Rieng|Giang Thanh|Go Quao|Ha Tien|Hon Dat|Kien Hai|Kien Luong|Phu Quoc|Rach Gia|Tan Hiep|(^U Minh Thuong$)|Vinh Thuan") ~ "Kien Giang",
+        #     stringr::str_detect(district, "Cu Lao Dung|Ke Sach|Long Phu|My Tu|My Xuyen|Nga Nam|Soc Trang|Thanh Tri|Tran De|Vinh Chau") ~ "Soc Trang",
+        #     stringr::str_detect(district, "Cau Ke|Cau Ngang|Cang Long|Chau Thanh (TV)|Duyen Hai|Duyen Hai|Tieu Can|Tra Cu|Tra Vinh") ~ "Tra Vinh",
+        #     TRUE ~ "NA"
+        #   )
+        )
       )
     ) %>% 
   # 
@@ -267,6 +289,7 @@ nlnn_mekong <-
 nlnn_mekong_df <- 
   data.frame(
     rawdata.df = do.call(function(...) rbind(data.frame(), ...), nlnn_mekong$rawdata),
+    province_en = rep(nlnn_mekong$province, times = nlnn_mekong$number_row),
     trait_en = rep(nlnn_mekong$trait, times = nlnn_mekong$number_row),
     trait_vn = rep(nlnn_mekong$trait_vietnamese, times = nlnn_mekong$number_row)
   ) %>% 
@@ -275,9 +298,20 @@ nlnn_mekong_df <-
       "district",
       "year",
       "number",
-      "province",
+      "province_en",
       "trait_en",
       "trait_vn"
+    )
+  ) %>% 
+  dplyr::mutate(
+    province_vn = dplyr::case_when(
+      stringr::str_detect(province_en, "Bac Lieu") ~ "Bạc Liêu",
+      stringr::str_detect(province_en, "Ben Tre") ~ "Bến Tre",
+      stringr::str_detect(province_en, "Ca Mau") ~ "Cà Mau",
+      stringr::str_detect(province_en, "Kien Giang") ~ "Kiên Giang",
+      stringr::str_detect(province_en, "Soc Trang") ~ "Sóc Trăng",
+      stringr::str_detect(province_en, "Tra Vinh") ~ "Trà Vinh",
+      TRUE ~ "NA"
     )
   ) %>% 
   dplyr::as_tibble()
@@ -287,3 +321,13 @@ nlnn_mekong_df %>%
 #
 ##
 ### END ### ---
+
+
+
+# annual production of paddy rice
+# Sản lượng lúa cả năm phân theo huyện
+
+
+
+
+
