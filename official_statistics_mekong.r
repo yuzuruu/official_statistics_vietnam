@@ -5,10 +5,15 @@
 
 ##### ---- load.library ---- 
 library(janitor)
+library(khroma)
+library(patchwork)
 library(tidyverse)
 library(sp)
+library(khroma)
 
 ##### ---- read.data ----
+# Read NLMM (Agriculture, Forestry, and Fishery) data
+# 
 # References
 # 1. Reading files with multibyte string / character
 # https://stackoverflow.com/questions/46503390/read-excel-correctly-imports-file-but-invalid-multibyte-string-error-when-try
@@ -23,6 +28,10 @@ library(sp)
 # 6. A new function tidyr::pivot_longer(), compatible with tidyr:;gather()
 # https://qiita.com/yanami/items/3775df6c579fd0a2d60c
 #
+# As for the other data sets (population, economy, industry, and others),
+# we need to add some codes. At the moment, we focus on the industries
+# and make this data set first.
+# 
 # make a list of target data
 path_list <-
   base::list.files(path = "mekong_trial",
@@ -314,20 +323,137 @@ nlnn_mekong_df <-
       TRUE ~ "NA"
     )
   ) %>% 
-  dplyr::as_tibble()
+  dplyr::na_if(.,0) %>% 
+  dplyr::as_tibble() %>% 
+  dplyr::mutate(
+    dplyr::across(
+      .cols = c(district, province_en, province_vn, trait_vn), 
+      .fns = factor
+      )
+    )
 # save the data frame
-nlnn_mekong_df %>% 
+nlnn_mekong_df %>%
   readr::write_excel_csv("nlnn_mekong_df.csv")
-#
+
+# 
 ##
 ### END ### ---
 
+##### ---- figure.collection ---- 
+# make a subset of the data set
+nlnn_mekong_df_target <- 
+  nlnn_mekong_df %>% 
+  dplyr::filter(
+    trait_en %in% c(
+      "production of shrimp aquaculture", 
+      "production of paddy rice", 
+      "production of winter spring paddy rice", 
+      "production of summer autumn paddy rice"
+      )
+    )
+# annual paddy rice production by province and district
+nlnn_mekong_line_paddy_total <-
+  nlnn_mekong_df_target %>% 
+  dplyr::filter(trait_en == "production of paddy rice") %>% 
+  group_by(province_en) %>%
+  nest() %>% 
+  dplyr::mutate(
+    line_plot = purrr::map(
+      data, 
+      ~
+        ggplot2::ggplot(
+          data = .,
+          aes(
+            x = year, 
+            y = number,
+            color = district
+          )
+        ) +
+        geom_line() +
+        geom_point() + 
+        scale_color_discreterainbow() +
+        xlim(
+          as.Date("2000/01/01"),
+          as.Date("2010/01/01")
+          ) +
+        ylim(0, 600000) +
+        labs(
+          title = province_en,
+          x = "Year",
+          y = "Paddy rice production (Unit: Ton)",
+          color = "District"
+        ) +
+        guides(color = guide_legend(title.position = "top", ncol = 2)) +
+        theme_classic() +
+        theme(
+          legend.position = "none",
+          legend.text = element_text(size = 10)
+        )
+    )
+  )
+# adjust legend position and other miscellaneous settings
+# to meet A4 paper size
+# 
+# Bac Lieu
+nlnn_paddy_line_01 <- nlnn_mekong_line_paddy_total$line_plot[[1]] + theme(legend.position = c(0.5,0.85), axis.title.x=element_blank())
+# Ben Tre
+nlnn_paddy_line_02 <- nlnn_mekong_line_paddy_total$line_plot[[2]] + theme(legend.position = c(0.5,0.85), axis.title.y=element_blank())
+# Ca Mau
+nlnn_paddy_line_03 <- 
+  nlnn_mekong_line_paddy_total$line_plot[[3]] + 
+  theme(
+    legend.position = c(0.5,0.85), 
+    axis.title.x=element_blank(), 
+    axis.title.y=element_blank()
+    )
+# Kien Giang
+nlnn_paddy_line_04 <- 
+  nlnn_mekong_line_paddy_total$line_plot[[4]] + 
+  theme(
+    legend.position = c(0.175,0.6), 
+    legend.key = element_blank(), 
+    legend.background = element_blank(), 
+    legend.text = element_text(size = 8),
+    axis.title.x=element_blank()
+    ) + 
+  guides(
+    color = guide_legend(
+      title.position = "top", 
+      ncol = 1, 
+      override.aes=list(fill=NA)
+      )
+    ) 
+# Soc Trang
+nlnn_paddy_line_05 <- 
+  nlnn_mekong_line_paddy_total$line_plot[[5]] + 
+  theme(
+    legend.position = c(0.5,0.85), 
+    legend.key = element_blank(), 
+    legend.background = element_blank(), 
+    legend.text = element_text(size = 8),
+    axis.title.y=element_blank()
+    )
+# Tra Vinh
+nlnn_paddy_line_06 <- nlnn_mekong_line_paddy_total$line_plot[[6]] + theme(legend.position = c(0.5,0.85), axis.title.x=element_blank(), axis.title.y=element_blank())
+# combine the figures of 6 provinces using patchwork() library
+nlnn_mekong_line_paddy_total <- 
+(nlnn_paddy_line_01 + nlnn_paddy_line_02 + nlnn_paddy_line_03) / (nlnn_paddy_line_04 + nlnn_paddy_line_05 + nlnn_paddy_line_06)
+# save the combined figure
+ggsave(
+  "nlnn_mekong_line_paddy_total.pdf",
+  plot = nlnn_mekong_line_paddy_total,
+  # set plot area size in mm.
+  width = 300,
+  height = 300,
+  units = "mm",
+  # set device to draw the pdf file
+  # When we draw pdf-formatted file with variety of language,
+  # it is necessary to use the cairo_pdf.
+  # When we draw other-format images such as jpg, 
+  # we need to set other devices.
+  device = cairo_pdf # important!!
+)
 
-
-# annual production of paddy rice
-# Sản lượng lúa cả năm phân theo huyện
-
-
-
-
-
+# 
+##
+### END ### ---
