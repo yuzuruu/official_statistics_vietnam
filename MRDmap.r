@@ -12,6 +12,7 @@ library(ggsn)
 library(khroma)
 library(maptools)
 library(osmdata)
+library(patchwork)
 library(sp)
 library(stringr)
 library(tidyverse)
@@ -339,6 +340,9 @@ mrd_bb <-
 
 # administrative boundaries
 adm <- readRDS("gadm36_VNM_1_sf.rds")
+adm1 <- readRDS("gadm36_VNM_1_sf.rds")
+adm2 <- readRDS("gadm36_VNM_2_sf.rds")
+adm3 <- readRDS("gadm36_VNM_3_sf.rds")
 khm <- readRDS("gadm36_KHM_0_sf.rds")
 
 vnm_ex_mrd <- 
@@ -533,13 +537,6 @@ mdr_multilayer_map <-
     )
 mdr_multilayer_map
 
-# 
-# save the results
-ggsave(
-  "mdr_multilayer_map.pdf", 
-  plot = mdr_multilayer_map
-  )
-# 
 # add provinces' name, scalebar, and north arrow to the previous map 
 mdr_multilayer_map_02 <- 
   mdr_multilayer_map +
@@ -590,3 +587,191 @@ ggsave(
 #
 
 
+### ---- mekong.river.basin ----
+# Making a map with administrative boundaries of Vietnam and Cambodia, 
+# and the Mekong River basin.
+# We obtained water-area data from DIVA-GIS
+# https://www.diva-gis.org/datadown
+#
+# read shape files
+# administrative boundaries
+adm_vnm <- readRDS("gadm36_VNM_0_sf.rds")
+adm_khm <- readRDS("gadm36_KHM_0_sf.rds")
+# water area
+water_khm <- sf::st_read("./KHM_wat/KHM_water_areas_dcw.shp")
+water_vnm <- sf::st_read("./VNM_wat/VNM_water_areas_dcw.shp")
+#
+# pick up necessary parts from the water-area data
+# assign the necessary parts' name
+# To check columns' names and their arguments, open .dbf file of the shape files.
+# Necessary parts can be found by trying drawing maps one by one.
+# Cambodia: We just needthe MR basin and Tonle Sab.
+river_name_khm <- 
+  c(
+    "BOENG TONLE SAB",   
+    "TONLE SAB", 
+    "TONLE BASAK", 
+    "MEKONG"
+  )
+# Vietnam: We just need MR basin.
+river_name_vnm <- 
+  c(
+    "SONG HAU GIANG", 
+    "MEKONG", 
+    "TONLE BASAK", 
+    "SONG TIEN GIANG", 
+    "SONG MY THO", 
+    "SONG CO CHIEN", 
+    "SONG HAM LUONG"
+  )
+# filter the necessary parts
+# Cambodia
+water_khm_ts <- 
+  water_khm %>% 
+  dplyr::filter(
+    NAME %in% river_name_khm
+    )
+# Vietnam
+water_vnm_ts <- 
+  water_vnm %>% 
+  dplyr::filter(
+    NAME %in% river_name_vnm
+    )
+#
+# Draw a map including the administrative boundaries
+# and MR basin
+water_khm_vnm <- 
+  ggplot() +
+  geom_sf(
+    data = adm_khm, 
+    color = "black",
+    fill = NA
+  ) +
+  geom_sf(
+    data = adm_vnm, 
+    color = "black",
+    fill = NA
+  ) +
+  geom_sf(
+    data = mrd_union, 
+    color = "black",
+    fill = "gray60",
+    alpha = 0.5
+  ) +
+  geom_sf(
+    color = "steelblue"
+  ) +
+  geom_sf(
+    data = water_khm_ts, 
+    color = "steelblue",
+    fill = "steelblue"
+  ) +
+  geom_sf(
+    data = water_vnm_ts, 
+    color = "steelblue",
+    fill = "steelblue"
+  ) +
+  theme_void()
+#
+# save the results
+ggsave(
+  "water_khm_vnm.pdf", 
+  plot = water_khm_vnm
+)
+
+#
+##
+### END of section --- ###
+##
+#
+
+
+
+
+adm2_mekong <- adm2 %>% dplyr::filter(NAME_1 %in% c("Bạc Liêu", "Bến Tre", "Cà Mau", "Kiên Giang", "Sóc Trăng","Trà Vinh"))
+adm1_mekong <- adm1 %>% dplyr::filter(NAME_1 %in% c("Bạc Liêu", "Bến Tre", "Cà Mau", "Kiên Giang", "Sóc Trăng","Trà Vinh"))
+
+
+adm2_mekong_centroid <- 
+  adm2_mekong %>% 
+  dplyr::mutate(
+    # First, we obtain the gravity
+    centroid = sf::st_centroid(geometry),
+    # Second, we compute the coordinates of the centroid into two parts; x (longitude) and y (latitude)
+    # x
+    center_x = st_coordinates(centroid)[,1],
+    # y
+    center_y = st_coordinates(centroid)[,2]
+  ) %>%
+  # remove geometry and centroid for convenient use
+  tidyr::as_tibble() %>% 
+  # select necessary variables
+  dplyr::select(
+    VARNAME_2,        
+    center_x,
+    center_y
+  )
+
+
+adm2_mekong_map <- 
+  adm2_mekong %>% 
+  ggplot2::ggplot() +
+  # geom_sf() is a popular function to draw a map
+  # In detail of the geom_sf(), please refer to the following page.
+  # https://ggplot2.tidyverse.org/reference/ggsf.html
+  # It is loaded together when we load the sf() package.
+  geom_sf(
+    fill = NA,
+    size = 1.0,
+    alpha = 1.0
+  ) +
+  geom_sf(
+    data = adm1_mekong,
+    inherit.aes = FALSE,
+    fill = NA,
+    color = "black",
+    size = 2.0,
+    alpha = 1.0
+  ) +
+  # add English names of the target provinces
+  geom_text(
+    data = adm2_mekong_centroid,
+    inherit.aes = FALSE,
+    aes(
+      x = center_x,
+      y = center_y,
+      label = VARNAME_2,
+      # adjust font size when necessary
+      size = 1
+    ),
+    show.legend = FALSE,
+    family = "Times"
+  ) +
+  labs(
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_classic()+
+  theme(
+    axis.text = element_text(size = 50),
+    axis.title = element_text(size = 50)
+  ) 
+# save the map
+# Adjust the width and height when necessary
+ggsave(
+  "adm2_mekong_map.pdf",
+  plot = adm2_mekong_map,
+  # set plot area size in mm.
+  width = 700,
+  height = 700,
+  units = "mm",
+  # set device to draw the pdf file
+  # When we draw pdf-formatted file with variety of language,
+  # it is necessary to use the cairo_pdf.
+  # When we draw other-format images such as jpg, 
+  # we need to set other devices.
+  device = cairo_pdf # important!!
+)
+
+
+adm2_mekong_map + mdr_multilayer_map_02
