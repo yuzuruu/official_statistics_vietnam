@@ -204,71 +204,71 @@ nlnn_mekong <-
           ) %>% 
         dplyr::mutate(
           district = dplyr::case_when(
-            # Bac Lieu
-            stringr::str_detect(district, "Bac Lieu") ~ "Bac Lieu",
-            stringr::str_detect(district, "Dong Hai") ~ "Dong Hai",
-            stringr::str_detect(district, "Gia Rai") ~ "Gia Rai",
-            stringr::str_detect(district, "Hong Dan") ~ "Hong Dan",
-            stringr::str_detect(district, "Hoa Binh") ~ "Hoa Binh",
-            stringr::str_detect(district, "Phuoc Long") ~ "Phuoc Long",
-            stringr::str_detect(district, "Vinh Loi") ~ "Vinh Loi",
-            # Ben Tre
-            stringr::str_detect(district, "Ben Tre") ~ "Ben Tre",
-            stringr::str_detect(district, "Ba Tri") ~ "Ba Tri",
-            stringr::str_detect(district, "Binh Dai") ~ "Binh Dai",
-            stringr::str_detect(district, "Cho Lach") ~ "Cho Lach",
-            stringr::str_detect(district, "Chau Thanh") ~ "Chau Thanh",
-            stringr::str_detect(district, "Giong Trom") ~ "Giong Trom",
+            # Bac Lieu (7)
+            stringr::str_detect(district, "Bac Lieu") ~ "Bac Lieu", #
+            stringr::str_detect(district, "Dong Hai") ~ "Dong Hai", #
+            stringr::str_detect(district, "Gia Rai") ~ "Gia Rai", #
+            stringr::str_detect(district, "Hong Dan") ~ "Hong Dan", #
+            stringr::str_detect(district, "Hoa Binh") ~ "Hoa Binh", #
+            stringr::str_detect(district, "Phuoc Long") ~ "Phuoc Long", #
+            stringr::str_detect(district, "Vinh Loi") ~ "Vinh Loi", #
+            # Ben Tre (8)
+            stringr::str_detect(district, "Ben Tre") ~ "Ben Tre", #
+            stringr::str_detect(district, "Ba Tri") ~ "Ba Tri", #
+            stringr::str_detect(district, "Binh Dai") ~ "Binh Dai", #
+            stringr::str_detect(district, "Cho Lach") ~ "Cho Lach", #
+            stringr::str_detect(district, "Chau Thanh") ~ "Chau Thanh", #
+            stringr::str_detect(district, "Giong Trom") ~ "Giong Trom", #
             # stringr::str_detect(district, "Mo Cay Bac") ~ "Mo Cay Bac",
             # stringr::str_detect(district, "Mo Cay Nam") ~ "Mo Cay Nam",
-            stringr::str_detect(district, "Mo Cay") ~ "Mo Cay",
-            stringr::str_detect(district, "Thanh Phu") ~ "Thanh Phu",
-            # Ca Mau
-            stringr::str_detect(district, "Ca Mau") ~ "Ca Mau",
-            stringr::str_detect(district, "Cai Nuoc") ~ "Cai Nuoc",
-            stringr::str_detect(district, "Dam Doi") ~ "Dam Doi",
-            stringr::str_detect(district, "Nam Can") ~ "Nam Can",
-            stringr::str_detect(district, "Ngoc Hien") ~ "Ngoc Hien",
-            stringr::str_detect(district, "Phu Tan") ~ "Phu Tan",
-            stringr::str_detect(district, "Thoi Binh") ~ "Thoi Binh",
-            stringr::str_detect(district, "Tran V. Thoi|Tran Van Thoi") ~ "Tran Van Thoi",
-            stringr::str_detect(district, "U Minh rural") ~ "U Minh",
-            # Kien Giang
-            stringr::str_detect(district, "An Bien|An Biên") ~ "An Bien",
-            stringr::str_detect(district, "An Minh|An Minh") ~ "An Minh",
-            stringr::str_detect(district, "Giong Rieng|Giồng Riềng") ~ "Giong Rieng",
-            stringr::str_detect(district, "Giang Thanh") ~ "Giang Thanh",
-            stringr::str_detect(district, "Go Quao|Huyện Gò Quao") ~ "Go Quao",
-            stringr::str_detect(district, "Ha Tien|Hà Tiên") ~ "Ha Tien",
-            stringr::str_detect(district, "Hon Dat|Hòn Đất") ~ "Hon Dat",
-            stringr::str_detect(district, "Kien Hai|Kiên Hải") ~ "Kien Hai",
-            stringr::str_detect(district, "Kien Luong|Kiên Lương") ~ "Kien Luong",
-            stringr::str_detect(district, "Phu Quoc|Phú Quốc") ~ "Phu Quoc",
-            stringr::str_detect(district, "Rach Gia|Rạch Giá") ~ "Rach Gia",
-            stringr::str_detect(district, "Tan Hiep|Tân Hiệp") ~ "Tan Hiep",
-            stringr::str_detect(district, "U Minh Thượng") ~ "U Minh Thuong",
-            stringr::str_detect(district, "Vinh Thuan|Vĩnh Thuận") ~ "Vinh Thuan",
-            stringr::str_detect(district, "Chau Thanh|Huyện Châu Thành") ~ "Chau Thanh",
-            # Soc Trang
-            stringr::str_detect(district, "Cu Lao Dung") ~ "Cu Lao Dung",
-            stringr::str_detect(district, "Ke Sach") ~ "Ke Sach",
-            stringr::str_detect(district, "Long Phu") ~ "Long Phu",
-            stringr::str_detect(district, "My Tu") ~ "My Tu",
-            stringr::str_detect(district, "My Xuyen") ~ "My Xuyen",
-            stringr::str_detect(district, "Nga Nam") ~ "Nga Nam",
-            stringr::str_detect(district, "Soc Trang") ~ "Soc Trang",
-            stringr::str_detect(district, "Thanh Tri") ~ "Thanh Tri",
-            stringr::str_detect(district, "Tran De") ~ "Tran De",
-            stringr::str_detect(district, "Vinh Chau") ~ "Vinh Chau",
-            # Tra Vinh
-            stringr::str_detect(district, "Cau Ke") ~ "Cau Ke",
-            stringr::str_detect(district, "Cau Ngang") ~ "Cau Ngang",
-            stringr::str_detect(district, "Cang Long") ~ "Cang Long",
-            stringr::str_detect(district, "Huyện Châu Thành - Chau Thanh District") ~ "Chau Thanh",
-            stringr::str_detect(district, "Duyen Hai") ~ "Duyen Hai",
-            stringr::str_detect(district, "Tieu Can") ~ "Tieu Can",
-            stringr::str_detect(district, "Tra Cu") ~ "Tra Cu",
-            stringr::str_detect(district, "Tra Vinh") ~ "Tra Vinh",
+            stringr::str_detect(district, "Mo Cay") ~ "Mo Cay",  #
+            stringr::str_detect(district, "Thanh Phu") ~ "Thanh Phu", #
+            # Ca Mau (9)
+            stringr::str_detect(district, "Ca Mau") ~ "Ca Mau", #
+            stringr::str_detect(district, "Cai Nuoc") ~ "Cai Nuoc", #
+            stringr::str_detect(district, "Dam Doi") ~ "Dam Doi", #
+            stringr::str_detect(district, "Nam Can") ~ "Nam Can", #
+            stringr::str_detect(district, "Ngoc Hien") ~ "Ngoc Hien", #
+            stringr::str_detect(district, "Phu Tan") ~ "Phu Tan", #
+            stringr::str_detect(district, "Thoi Binh") ~ "Thoi Binh", #
+            stringr::str_detect(district, "Tran V. Thoi|Tran Van Thoi") ~ "Tran Van Thoi", #
+            stringr::str_detect(district, "U Minh rural") ~ "U Minh", #
+            # Kien Giang (15)
+            stringr::str_detect(district, "An Bien|An Biên") ~ "An Bien", #
+            stringr::str_detect(district, "An Minh|An Minh") ~ "An Minh", #
+            stringr::str_detect(district, "Giong Rieng|Giồng Riềng") ~ "Giong Rieng", #
+            stringr::str_detect(district, "Giang Thanh") ~ "Giang Thanh", 
+            stringr::str_detect(district, "Go Quao|Huyện Gò Quao") ~ "Go Quao", #
+            stringr::str_detect(district, "Ha Tien|Hà Tiên") ~ "Ha Tien", #
+            stringr::str_detect(district, "Hon Dat|Hòn Đất") ~ "Hon Dat", #
+            stringr::str_detect(district, "Kien Hai|Kiên Hải") ~ "Kien Hai", #
+            stringr::str_detect(district, "Kien Luong|Kiên Lương") ~ "Kien Luong", #
+            stringr::str_detect(district, "Phu Quoc|Phú Quốc") ~ "Phu Quoc", #
+            stringr::str_detect(district, "Rach Gia|Rạch Giá") ~ "Rach Gia", #
+            stringr::str_detect(district, "Tan Hiep|Tân Hiệp") ~ "Tan Hiep", #
+            stringr::str_detect(district, "U Minh Thượng") ~ "U Minh Thuong", #
+            stringr::str_detect(district, "Vinh Thuan|Vĩnh Thuận") ~ "Vinh Thuan", #
+            stringr::str_detect(district, "Chau Thanh|Huyện Châu Thành") ~ "Chau Thanh", #
+            # Soc Trang (10)
+            stringr::str_detect(district, "Cu Lao Dung") ~ "Cu Lao Dung", #
+            stringr::str_detect(district, "Ke Sach") ~ "Ke Sach", #
+            stringr::str_detect(district, "Long Phu") ~ "Long Phu", #
+            stringr::str_detect(district, "My Tu") ~ "My Tu",#
+            stringr::str_detect(district, "My Xuyen") ~ "My Xuyen", #
+            stringr::str_detect(district, "Nga Nam") ~ "Nga Nam", #
+            stringr::str_detect(district, "Soc Trang") ~ "Soc Trang", #
+            stringr::str_detect(district, "Thanh Tri") ~ "Thanh Tri", #
+            stringr::str_detect(district, "Tran De") ~ "Tran De", 
+            stringr::str_detect(district, "Vinh Chau") ~ "Vinh Chau", #
+            # Tra Vinh (8)
+            stringr::str_detect(district, "Cau Ke") ~ "Cau Ke", #
+            stringr::str_detect(district, "Cau Ngang") ~ "Cau Ngang", #
+            stringr::str_detect(district, "Cang Long") ~ "Cang Long", #
+            stringr::str_detect(district, "Huyện Châu Thành - Chau Thanh District") ~ "Chau Thanh", #
+            stringr::str_detect(district, "Duyen Hai") ~ "Duyen Hai", #
+            stringr::str_detect(district, "Tieu Can") ~ "Tieu Can", #
+            stringr::str_detect(district, "Tra Cu") ~ "Tra Cu", #
+            stringr::str_detect(district, "Tra Vinh") ~ "Tra Vinh", #
             TRUE ~ "hoge"
           )
         # ) %>% 
@@ -601,7 +601,339 @@ ggsave(
   # we need to set other devices.
   device = cairo_pdf # important!!
 )
+# 
+##
+### END ### ---
+##
+#
+
+##### ---- union.map ---- 
+# We need to unite district-level administrative boundaries to
+# cope with merge / establishment of district in 2009.
+# In BT, KG, and ST, some communes have been separated to deal with overpopulation.
+# This results in rearrangement of the administrative boundaries. It means that
+# we need to recompute spatial weight matrix in accordance with the rearrangement.
+# The administrative boundaries data, however, is not distributed at the moment.
+# We need to make the data by ourselves using existing data.
+# 
+# Referring to the MSExcel data set, we can check existed districts' names by province.
+# The following three districts were established in 2009
+# 1/3 MO CAY in BT were then separated into two districts; MO CAY BAC and MO CAY NAM
+# In this case, we just need to unite the MCB and MCN.
+# 
+# 2/3 KIEN LUONG in KG were then separated into two districts; GIANG THANH AND KIEN LUONG 
+# In this case, as in Mo Cay, we need to unite GT and KL.
+# 
+# 3/3 TRAN DE in ST were then established from communes of two districts; LONG PHU AND MY XUYEN
+# In this case, the situation appears complex.
+# The Tran De district were established from communes belonging Long Phu and My Xuyen. 
+# To make existed administrative boundaries of Long Phu and My Xuyen, we need to 
+# separate communes belonging to Tran De while checking original affiliation. At the moment,
+# there exists 11 communes as follows:
+# 
+# 1. Dai An 2: former a part of Long Phu
+# 2. Lich Hoi Thuong: former a part of Long Phu
+# 3. Lich Hoi Thuong: former a part of Long Phu
+# 4. Lieu Tu: former a part of Long Phu
+# 5. Tai Van: former a part of My Xuyen
+# 6. Thanh Thoi An: former a part of My Xuyen
+# 7. Thanh Thoi Thuan: former a part of My Xuyen
+# 8. Tran De: former a part of Long Phu (newly established in 2009)
+# 9. Trung Binh: former a part of Long Phu
+# 10. Vien An: former a part of My Xuyen
+# 11. Vien Binh: former a part of My Xuyen
+# 
+# Fortunately, we have commune-level administrative boundaries data. 
+# We can!!
+# 
+# Just to check names and location of communes
+# 
+# adm2_st <- adm2 %>% dplyr::filter(NAME_1 == "Kiên Giang")
+# adm3_st <- adm3 %>% dplyr::filter(NAME_1 == "Kiên Giang")
+# adm3_st_centroid <-
+#   adm3_st %>%
+#   dplyr::mutate(
+#     # First, we obtain the gravity
+#     centroid = sf::st_centroid(geometry),
+#     # Second, we compute the coordinates of the centroid; x (longitude) and y (latitude)
+#     # x
+#     center_x = st_coordinates(centroid)[,1],
+#     # y
+#     center_y = st_coordinates(centroid)[,2]
+#   ) %>%
+#   # remove geometry and centroid for convenient use
+#   tidyr::as_tibble() %>%
+#   # select necessary variables
+#   dplyr::select(
+#     VARNAME_3,
+#     center_x,
+#     center_y
+#   )
+# 
+# hogemap <-
+#   ggplot() +
+#   geom_sf() +
+#   geom_sf(
+#     data = adm3_st,
+#     inherit.aes = FALSE,
+#     fill = NA,
+#     size = 0.2,
+#     color  = "black",
+#     alpha = 1.0
+#   ) +
+#   geom_sf(
+#     data = adm2_st,
+#     inherit.aes = FALSE,
+#     size = 1.0,
+#     fill = NA,
+#     color  = "black",
+#     alpha = 1.0
+#   ) +
+#   geom_text(
+#     data = adm3_st_centroid,
+#     aes(
+#       x = center_x,
+#       y = center_y,
+#       label = VARNAME_3,
+#       # adjust font size when necessary
+#       size = 1
+#     ),
+#     show.legend = FALSE,
+#     family = "Times"
+#   ) +
+#   theme_classic()
+# 
+# ggsave(
+#   "hogemap.pdf",
+#   plot = hogemap,
+#   # set plot area size in mm.
+#   width = 1000,
+#   height = 1000,
+#   units = "mm",
+#   # set device to draw the pdf file
+#   # When we draw pdf-formatted file with variety of language,
+#   # it is necessary to use the cairo_pdf.
+#   # When we draw other-format images such as jpg, 
+#   # we need to set other devices.
+#   device = cairo_pdf # important!!
+# )
+
+# read source of another file to use existing codes
+# In the source, there are some codes to draw maps
+source("MRDmap.r")
+
+# make a merged polygon excluding target districts
+# NOTE
+# As for the Tran de district in ST, we use adm3 data.
+# Here, we just omit the relevant districts in ST. Afterward, we will combine. 
+adm2_mekong_ex_target <- 
+  adm2_mekong %>% 
+  dplyr::filter(!(NAME_2 %in% c("Mỏ Cày Bắc","Mỏ Cày Nam", "Giang Thành", "Kiên Lương", "Mỹ Xuyên", "Long Phú", "Trần Đề")))
+# Ben Tre
+# make a merged polygon of MO CAY district in BT
+mo_cay_bt_sf <- 
+  adm2_mekong %>% 
+  dplyr::filter(
+    # pick up target district
+    NAME_2 %in% c(
+      "Mỏ Cày Bắc", 
+      "Mỏ Cày Nam"
+      )
+    ) %>% 
+  # unite the picked up district
+  sf::st_union(
+    by_feature = FALSE
+    ) %>% 
+  # cast geometry's type to another
+  # This time, we transform that into MULTIPOLYGON.
+  sf::st_cast("MULTIPOLYGON")
+# make a data frame for the MO CAY district in BT
+# We set temporal GIDs. In fact, we do not use the GIDs and do not need to
+# consider the GIDs carefully.
+mo_cay_bt_df <- data.frame(
+  GID_0  = "VNM", 
+  NAME_0 = "Vietnam", 
+  GID_1  = "VNM.6_united",
+  NAME_1  = "Bến Tre",
+  NL_NAME_1  = NA,
+  GID_2  = "VNM.6.7_united",      
+  NAME_2  = "Mỏ Cày",  
+  VARNAME_2  = "Mo Cay",
+  NL_NAME_2  = NA, 
+  TYPE_2  = "Huyện", 
+  ENGTYPE_2  = "District", 
+  CC_2  = NA,   
+  HASC_2  = "VN.VL.BM_united"
+)
+# make a data frame with sf and data.frame objects
+# Later, we will combine this with an object named "adm2_mekong_ex_target"
+mo_cay_bt <- cbind(mo_cay_bt_df,mo_cay_bt_sf) %>% st_as_sf(sf_column_name = "geometry")
+# 
+# Kien Giang
+# make a merged polygon of Kien Luong district in KG
+kien_luong_kg_sf <- 
+  adm2_mekong %>% 
+  dplyr::filter(
+    # pick up target district
+    NAME_2 %in% c(
+      "Kiên Lương", 
+      "Giang Thành"
+    )
+  ) %>% 
+  # unite the picked up district
+  sf::st_union(
+    by_feature = FALSE
+  ) %>% 
+  # cast geometry's type to another
+  # This time, we transform that into MULTIPOLYGON.
+  sf::st_cast("MULTIPOLYGON")
+# make a data frame for the Kien Luong district in KG
+# We set temporal GIDs. In fact, we do not use the GIDs and do not need to
+# consider the GIDs carefully.
+kien_luong_kg_df <- data.frame(
+  GID_0  = "VNM", 
+  NAME_0 = "Vietnam", 
+  GID_1  = "VNM.33_united",
+  NAME_1  = "Kiên Giang",
+  NL_NAME_1  = NA,
+  GID_2  = "VNM.33.10_1_united_united",      
+  NAME_2  = "Kiên Lương",  
+  VARNAME_2  = "Kien Luong",
+  NL_NAME_2  = NA, 
+  TYPE_2  = "Huyện", 
+  ENGTYPE_2  = "District", 
+  CC_2  = NA,   
+  HASC_2  = "VN.QN.MC_united"
+)
+# make a data frame with sf and data.frame objects
+# Later, we will combine this with an object named "adm2_mekong_ex_target"
+kien_luong_kg <- cbind(kien_luong_kg_df,kien_luong_kg_sf) %>% st_as_sf(sf_column_name = "geometry")
+# 
+# Soc Trang
+# My Xuyen
+my_xuyen_st_sf <- 
+  adm3 %>% 
+  dplyr::filter(
+    # pick up target district
+    NAME_2 %in% c(
+      "Long Phú", 
+      "Mỹ Xuyên",
+      "Trần Đề"
+    )
+  ) %>% 
+  dplyr::filter(
+    NAME_3 %in% c(
+      "Tài Văn",
+      "Thạnh Thới An",
+      "Thạnh Thới Thuận",
+      "Viên An",
+      "Viên Bình",
+      "Đại Tâm",
+      "Gia Hòa 1",
+      "Gia Hòa 2",
+      "Hòa Tú 1",
+      "Hòa Tú 2",
+      "Mỹ Xuyên",
+      "Ngọc Đông",
+      "Ngọc Tố",
+      "Thạnh Phú",
+      "Thạnh Quới",
+      "Tham Đôn"
+    )
+  ) %>% 
+  # unite the picked up district
+  sf::st_union(
+    by_feature = FALSE
+  ) %>% 
+  # cast geometry's type to another
+  # This time, we transform that into MULTIPOLYGON.
+  sf::st_cast("MULTIPOLYGON")
+# Soc Trang
+# Long Phu
+long_phu_st_sf <- 
+  adm3 %>% 
+  dplyr::filter(
+    # pick up target district
+    NAME_2 %in% c(
+      "Long Phú", 
+      "Mỹ Xuyên",
+      "Trần Đề"
+    )
+  ) %>% 
+  dplyr::filter(
+    NAME_3 %in% c(
+      "Đại Ân 2",
+      "Lịch Hội Thượng (Thị trấn )",
+      "Lịch Hội Thượng (Xã)",
+      "Liêu Tú",
+      "Trần Đề",
+      "Trung Bình",
+      "Châu Khánh",
+      "Đại Ngãi",
+      "Hậu Thạnh",
+      "Long Đức",
+      "Long Phú (Thị trấn )",
+      "Long Phú (Xã)",
+      "Phú Hữu",
+      "Song Phụng",
+      "Tân Hưng",
+      "Tân Thạnh",
+      "Trường Khánh"
+    )
+  ) %>% 
+  # unite the picked up district
+  sf::st_union(
+    by_feature = FALSE
+  ) %>% 
+  # cast geometry's type to another
+  # This time, we transform that into MULTIPOLYGON.
+  sf::st_cast("MULTIPOLYGON")
+my_xuyen_st_df <- data.frame(
+  GID_0  = "VNM", 
+  NAME_0 = "Vietnam", 
+  GID_1  = "VNM.51_united",
+  NAME_1  = "Sóc Trăng",
+  NL_NAME_1  = NA,
+  GID_2  = "VNM.51.6_1_united",      
+  NAME_2  = "Mỹ Xuyên",  
+  VARNAME_2  = "My Xuyen",
+  NL_NAME_2  = NA, 
+  TYPE_2  = "Huyện", 
+  ENGTYPE_2  = "District", 
+  CC_2  = NA,   
+  HASC_2  = "VN.HD.TM_united"
+)
+long_phu_st_df <- data.frame(
+  GID_0  = "VNM", 
+  NAME_0 = "Vietnam", 
+  GID_1  = "VNM.51_united",
+  NAME_1  = "Sóc Trăng",
+  NL_NAME_1  = NA,
+  GID_2  = "VNM.51.4_1_united",      
+  NAME_2  = "Long Phú",  
+  VARNAME_2  = "Long Phu",
+  NL_NAME_2  = NA, 
+  TYPE_2  = "Huyện", 
+  ENGTYPE_2  = "District", 
+  CC_2  = NA,   
+  HASC_2  = "VN.DA.TK_united"
+)
+# 
+# make a data frame with sf and data.frame objects
+# Later, we will combine this with an object named "adm2_mekong_ex_target"
+my_xuyen_st <- cbind(my_xuyen_st_df,my_xuyen_st_sf) %>% st_as_sf(sf_column_name = "geometry")
+long_phu_st <- cbind(long_phu_st_df,long_phu_st_sf) %>% st_as_sf(sf_column_name = "geometry")
+# 
+# Combine the data altogether
+adm2_mekong_before_2009 <- 
+  adm2_mekong_ex_target %>% 
+  dplyr::bind_rows(mo_cay_bt) %>% 
+  dplyr::bind_rows(kien_luong_kg) %>% 
+  dplyr::bind_rows(my_xuyen_st) %>% 
+  dplyr::bind_rows(long_phu_st)
 
 # 
 ##
 ### END ### ---
+##
+#
