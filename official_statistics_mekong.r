@@ -1,8 +1,12 @@
 ##############################################################################
 # Socioeconomic data of the Mekong delta region by district
-# 6th. September
+# Start: 6th. September 2021
+# Revise: 24th. September 2021
 # by Yuzuru Utsunomiya
-
+# Detailed history of this codes can be referred to my Github.
+# https://github.com/yuzuruu/official_statistics_vietnam/blob/master/official_statistics_mekong.r
+# 
+# 
 ##### ---- load.library ---- 
 library(janitor)
 library(khroma)
@@ -646,89 +650,29 @@ ggsave(
 # Fortunately, we have commune-level administrative boundaries data. 
 # We can!!
 # 
-# Just to check names and location of communes
-# 
-# adm2_st <- adm2 %>% dplyr::filter(NAME_1 == "Kiên Giang")
-# adm3_st <- adm3 %>% dplyr::filter(NAME_1 == "Kiên Giang")
-# adm3_st_centroid <-
-#   adm3_st %>%
-#   dplyr::mutate(
-#     # First, we obtain the gravity
-#     centroid = sf::st_centroid(geometry),
-#     # Second, we compute the coordinates of the centroid; x (longitude) and y (latitude)
-#     # x
-#     center_x = st_coordinates(centroid)[,1],
-#     # y
-#     center_y = st_coordinates(centroid)[,2]
-#   ) %>%
-#   # remove geometry and centroid for convenient use
-#   tidyr::as_tibble() %>%
-#   # select necessary variables
-#   dplyr::select(
-#     VARNAME_3,
-#     center_x,
-#     center_y
-#   )
-# 
-# hogemap <-
-#   ggplot() +
-#   geom_sf() +
-#   geom_sf(
-#     data = adm3_st,
-#     inherit.aes = FALSE,
-#     fill = NA,
-#     size = 0.2,
-#     color  = "black",
-#     alpha = 1.0
-#   ) +
-#   geom_sf(
-#     data = adm2_st,
-#     inherit.aes = FALSE,
-#     size = 1.0,
-#     fill = NA,
-#     color  = "black",
-#     alpha = 1.0
-#   ) +
-#   geom_text(
-#     data = adm3_st_centroid,
-#     aes(
-#       x = center_x,
-#       y = center_y,
-#       label = VARNAME_3,
-#       # adjust font size when necessary
-#       size = 1
-#     ),
-#     show.legend = FALSE,
-#     family = "Times"
-#   ) +
-#   theme_classic()
-# 
-# ggsave(
-#   "hogemap.pdf",
-#   plot = hogemap,
-#   # set plot area size in mm.
-#   width = 1000,
-#   height = 1000,
-#   units = "mm",
-#   # set device to draw the pdf file
-#   # When we draw pdf-formatted file with variety of language,
-#   # it is necessary to use the cairo_pdf.
-#   # When we draw other-format images such as jpg, 
-#   # we need to set other devices.
-#   device = cairo_pdf # important!!
-# )
-
 # read source of another file to use existing codes
 # In the source, there are some codes to draw maps
 source("MRDmap.r")
-
+# 
 # make a merged polygon excluding target districts
 # NOTE
 # As for the Tran de district in ST, we use adm3 data.
 # Here, we just omit the relevant districts in ST. Afterward, we will combine. 
 adm2_mekong_ex_target <- 
   adm2_mekong %>% 
-  dplyr::filter(!(NAME_2 %in% c("Mỏ Cày Bắc","Mỏ Cày Nam", "Giang Thành", "Kiên Lương", "Mỹ Xuyên", "Long Phú", "Trần Đề")))
+  dplyr::filter(!(NAME_2 %in% c(
+    "Mỏ Cày Bắc",
+    "Mỏ Cày Nam", 
+    "Giang Thành", 
+    "Kiên Lương", 
+    "Châu Thành", 
+    "Mỹ Tú", 
+    "Mỹ Xuyên", 
+    "Long Phú", 
+    "Trần Đề"
+    )
+    )
+    )
 # Ben Tre
 # make a merged polygon of MO CAY district in BT
 mo_cay_bt_sf <- 
@@ -810,6 +754,44 @@ kien_luong_kg_df <- data.frame(
 kien_luong_kg <- cbind(kien_luong_kg_df,kien_luong_kg_sf) %>% st_as_sf(sf_column_name = "geometry")
 # 
 # Soc Trang
+my_tu_st_sf <- 
+  adm2_mekong %>% 
+  dplyr::filter(
+    # pick up target district
+    NAME_2 %in% c(
+      "Châu Thành", 
+      "Mỹ Tú"
+      ) &
+    NAME_1 == "Sóc Trăng"
+  ) %>% 
+  # unite the picked up district
+  sf::st_union(
+    by_feature = FALSE
+  ) %>% 
+  # cast geometry's type to another
+  # This time, we transform that into MULTIPOLYGON.
+  sf::st_cast("MULTIPOLYGON")
+# make a data frame for the Kien Luong district in KG
+# We set temporal GIDs. In fact, we do not use the GIDs and do not need to
+# consider the GIDs carefully.
+my_tu_st_df <- data.frame(
+  GID_0  = "VNM", 
+  NAME_0 = "Vietnam", 
+  GID_1  = "VNM.51_1_united",
+  NAME_1  = "Sóc Trăng",
+  NL_NAME_1  = NA,
+  GID_2  = "VNM.51.1_1_united_united",      
+  NAME_2  = "Mỹ Tú",  
+  VARNAME_2  = "My Tu",
+  NL_NAME_2  = NA, 
+  TYPE_2  = "Huyện", 
+  ENGTYPE_2  = "District", 
+  CC_2  = NA,   
+  HASC_2  = NA
+)
+# make a data frame with sf and data.frame objects
+# Later, we will combine this with an object named "adm2_mekong_ex_target"
+my_tu_st <- cbind(my_tu_st_df,my_tu_st_sf) %>% st_as_sf(sf_column_name = "geometry")
 # My Xuyen
 my_xuyen_st_sf <- 
   adm3 %>% 
@@ -928,10 +910,76 @@ long_phu_st <- cbind(long_phu_st_df,long_phu_st_sf) %>% st_as_sf(sf_column_name 
 adm2_mekong_before_2009 <- 
   adm2_mekong_ex_target %>% 
   dplyr::bind_rows(mo_cay_bt) %>% 
-  dplyr::bind_rows(kien_luong_kg) %>% 
+  dplyr::bind_rows(kien_luong_kg) %>%
+  dplyr::bind_rows(my_tu_st) %>% 
   dplyr::bind_rows(my_xuyen_st) %>% 
-  dplyr::bind_rows(long_phu_st)
-
+  dplyr::bind_rows(long_phu_st) 
+# merge the combined data with sf data
+nlnn_mekong_df_target_sf <- 
+  nlnn_mekong_df_target %>% 
+  dplyr::left_join(adm2_mekong_before_2009,
+                   by = c(
+                     "province_vn" = "NAME_1", 
+                     "district" = "VARNAME_2"
+                     )
+  ) %>% 
+  dplyr::select(
+    -GID_0, 
+    -NAME_0, 
+    -NL_NAME_1, 
+    -GID_1, 
+    -GID_2, 
+    -NL_NAME_2, 
+    -TYPE_2, 
+    -ENGTYPE_2, 
+    -CC_2, 
+    -HASC_2
+    ) %>% 
+  data.table::setnames(
+    c(
+      "district_en",
+      "year",
+      "number",
+      "province_en",
+      "trait_en",
+      "trait_vn",
+      "province_vn",
+      "district_vn",
+      "geometry"
+      )
+    )
+# 
+# Draw choropleth maps by year and trait
+nlnn_mekong_df_target_map <- 
+  nlnn_mekong_df_target_sf %>% 
+  group_by(year, trait_en) %>% 
+  nest() %>% 
+  dplyr::mutate(
+    production_map = purrr::map(
+      data,
+      ~ 
+        ggplot(data = ., aes(geometry = geometry, fill = number)) +
+        geom_sf() + 
+        scale_fill_viridis(option = "plasma", na.value = "white") +
+        labs(
+          title = trait_en, 
+          subtitle = year,
+          x = "Longitude",
+          y = "Latitude",
+          fill = "Production volume \n (Unit: metric t)"
+          ) +
+        theme_classic() +
+        theme(
+          legend.position = "bottom",
+          legend.key.width= unit(2, 'cm')
+        )
+    )
+  )
+# save the map
+pdf("nlnn_mekong_df_target_map.pdf")
+nlnn_mekong_df_target_map$production_map
+dev.off()
+# 
 # 
 ##
 ### END ### ---
