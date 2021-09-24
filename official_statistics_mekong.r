@@ -1,8 +1,12 @@
 ##############################################################################
 # Socioeconomic data of the Mekong delta region by district
-# 6th. September
+# Start: 6th. September 2021
+# Revise: 24th. September 2021
 # by Yuzuru Utsunomiya
-
+# Detailed history of this codes can be referred to my Github.
+# https://github.com/yuzuruu/official_statistics_vietnam/blob/master/official_statistics_mekong.r
+# 
+# 
 ##### ---- load.library ---- 
 library(janitor)
 library(khroma)
