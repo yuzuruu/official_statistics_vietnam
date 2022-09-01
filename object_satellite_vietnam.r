@@ -117,7 +117,6 @@ object_Vietnam_lat_lon <-
   # https://gis.stackexchange.com/questions/404385/r-sf-some-edges-are-crossing-in-a-multipolygon-how-to-make-it-valid-when-using
   dplyr::mutate(
     true_false = sf::st_is_valid(.)
-    ) %>%
   # select vali data
   dplyr::filter(true_false == "TRUE") %>%
   # add longitude and latitude
@@ -125,7 +124,6 @@ object_Vietnam_lat_lon <-
     area = sf::st_area(.),
     lon = st_coordinates(sf::st_centroid(.))[,1],
     lat = st_coordinates(sf::st_centroid(.))[,2]
-    )
 # saveRDS(object_Vietnam_lat_lon, "object_Vietnam_lat_lon.rds")
 # rm(object_Vietnam_lat_lon)
 # gc()
@@ -377,5 +375,3 @@ object_Vietnam <-
   inner_join(object_Vietnam_address, by = "id")
 # save
 saveRDS(object_Vietnam, "object_Vietnam.rds")
-
-
