@@ -12,176 +12,166 @@
 # ---- read.library ----
 library(tidyverse)
 library(sf)
+library(ggsn)
 library(furrr)
 library(rsample)
-#
-#
-##
-### END ---
-##
-#
-# ---- read.data ----
-# read object data
-# The .geojson data is huge. It takes long time.
-# object_Vietnam_data <- 
-sf::st_read("./object/Vietnam.geojsonl")
-# Remove objects when not in use
-# read the shapefiles by country
-shp_Vietnam <- 
-  sf::st_read(
-    "./shapefiles/VNM_adm2.shp", 
-    options = "ENCODING=UTF-8", 
-    stringsAsFactors=FALSE
-  ) %>% 
-  dplyr::mutate_if(
-    is.character, 
-    enc2utf8
-  )
-# ---- read.function ----
-# a function to find address from lat / lon while using the shapefiles
-# We thank following links.
-# https://qiita.com/nozma/items/808bce2f496eabd50ff1
-# https://qiita.com/uri/items/69b2c05f7b3a21d3aad3
-find_city <- function(sp_polygon = df, lon = lon, lat = lat){
-  # find a polygon containing a certain pair of lon / lat
-  which.row <- 
-    sf::st_contains(
-      sp_polygon, 
-      sf::st_point(
-        c(
-          lon, 
-          lat
-        )
-      ), 
-      sparse = FALSE
-    ) %>%  
-    grep(TRUE, .)
-  # If not, leave a warning message
-  if(identical(which.row, integer(0)) == TRUE) {
-    # message("Assigned coordinates are not included at all.")
-    return(NA)
-    # If exist, obtain information of coordinates
-  } else {
-    geos <- 
-      sp_polygon[which.row, ] %>%
-      # transform from factor to character
-      dplyr::mutate_if(
-        is.factor, 
-        as.character
-      ) %>% 
-      # obtain necessary part of the shapefile
-      dplyr::mutate_at(
-        dplyr::vars(NAME_1), 
-        dplyr::funs(
-          dplyr::if_else(
-            # Is it NA?
-            condition = is.na(.),
-            # if NA, return blank
-            true = "", 
-            # if not, use it
-            false = .
-          )
-        )
-      )
-    # make a dataset of administrative boundaries
-    # Names and IDs are obtained from shapefiles
-    res <- tibble::data_frame(
-      province_code = geos$ID_1,
-      district_code = geos$ID_2,
-      # town_code = geos$ID_3,
-      province_name = geos$NAME_1,
-      district_name = geos$VARNAME_2,
-      # town_name = geos$NAME_3
-    )
-    # return results
-    return(res)
-  }
-}
-#
-#
-##
-### END ---
-##
-#
 # 
-# ---- make.area.data ----
-#  Calculate area of objects from the .geojson file
-# # WARNING
-# # This process needs long computation periods.
-object_Vietnam_lat_lon <-
-  # provide data
-  object_Vietnam_data %>%
-  # evaluate the geometries whether they are validated
-  # If not, functions below will not work.
-  # In detail, refer to the following page.
-  # https://gis.stackexchange.com/questions/404385/r-sf-some-edges-are-crossing-in-a-multipolygon-how-to-make-it-valid-when-using
-  dplyr::mutate(
-    true_false = sf::st_is_valid(.)
-  ) %>% 
-  # select vali data
-  dplyr::filter(true_false == "TRUE") %>%
-  # add longitude and latitude
-  dplyr::mutate(
-    area = sf::st_area(.),
-    lon = st_coordinates(sf::st_centroid(.))[,1],
-    lat = st_coordinates(sf::st_centroid(.))[,2]
-  )
+# # ---- read.data ----
+# # read object data
+# # The .geojson data is huge. It takes long time.
+# # object_Vietnam_data <-
+# sf::st_read("./object/Vietnam.geojsonl")
+# # Remove objects when not in use
+# # read the shapefiles by country
+# shp_Vietnam <-
+#   sf::st_read(
+#     "./shapefiles/VNM_adm2.shp",
+#     options = "ENCODING=UTF-8",
+#     stringsAsFactors=FALSE
+#   ) %>%
+#   dplyr::mutate_if(
+#     is.character,
+#     enc2utf8
+#   )
+# # ---- read.function ----
+# # a function to find address from lat / lon while using the shapefiles
+# # We thank following links.
+# # https://qiita.com/nozma/items/808bce2f496eabd50ff1
+# # https://qiita.com/uri/items/69b2c05f7b3a21d3aad3
+# find_city <- function(sp_polygon = df, lon = lon, lat = lat){
+#   # find a polygon containing a certain pair of lon / lat
+#   which.row <-
+#     sf::st_contains(
+#       sp_polygon,
+#       sf::st_point(
+#         c(
+#           lon,
+#           lat
+#         )
+#       ),
+#       sparse = FALSE
+#     ) %>%
+#     grep(TRUE, .)
+#   # If not, leave a warning message
+#   if(identical(which.row, integer(0)) == TRUE) {
+#     # message("Assigned coordinates are not included at all.")
+#     return(NA)
+#     # If exist, obtain information of coordinates
+#   } else {
+#     geos <-
+#       sp_polygon[which.row, ] %>%
+#       # transform from factor to character
+#       dplyr::mutate_if(
+#         is.factor,
+#         as.character
+#       ) %>%
+#       # obtain necessary part of the shapefile
+#       dplyr::mutate_at(
+#         dplyr::vars(NAME_1),
+#         dplyr::funs(
+#           dplyr::if_else(
+#             # Is it NA?
+#             condition = is.na(.),
+#             # if NA, return blank
+#             true = "",
+#             # if not, use it
+#             false = .
+#           )
+#         )
+#       )
+#     # make a dataset of administrative boundaries
+#     # Names and IDs are obtained from shapefiles
+#     res <- tibble::data_frame(
+#       province_code = geos$ID_1,
+#       district_code = geos$ID_2,
+#       # town_code = geos$ID_3,
+#       province_name = geos$NAME_1,
+#       district_name = geos$VARNAME_2,
+#       # town_name = geos$NAME_3
+#     )
+#     # return results
+#     return(res)
+#   }
+# }
+# 
+# # ---- make.area.data ----
+# #  Calculate area of objects from the .geojson file
+# # # WARNING
+# # # This process needs long computation periods.
+# object_Vietnam_lat_lon <-
+#   # provide data
+#   object_Vietnam_data %>%
+#   # evaluate the geometries whether they are validated
+#   # If not, functions below will not work.
+#   # In detail, refer to the following page.
+#   # https://gis.stackexchange.com/questions/404385/r-sf-some-edges-are-crossing-in-a-multipolygon-how-to-make-it-valid-when-using
+#   dplyr::mutate(
+#     true_false = sf::st_is_valid(.)
+#   ) %>%
+#   # select vali data
+#   dplyr::filter(true_false == "TRUE") %>%
+#   # add longitude and latitude
+#   dplyr::mutate(
+#     area = sf::st_area(.),
+#     lon = st_coordinates(sf::st_centroid(.))[,1],
+#     lat = st_coordinates(sf::st_centroid(.))[,2]
+#   )
 # saveRDS(object_Vietnam_lat_lon, "object_Vietnam_lat_lon.rds")
 # rm(object_Vietnam_lat_lon)
 # gc()
 # gc()
 # 
-# read
-object_Vietnam_sample <- 
-  readRDS("object_Vietnam_lat_lon.rds") %>% 
-  dplyr::mutate(
-    id = c(1:nrow(.))) %>%
-  dplyr::select(-true_false, -area) %>% 
-  sf::st_drop_geometry()
-# %>%
-#   dplyr::sample_frac(size = 0.1)
-
-
-# primitive but prudent way
-set.seed(123)
-# obtain group id
-# NOTE
-# We need to separate the data without surplus
-# This time, our data can be divided by an appropriate number (16).
-idx <- sample(1:nrow(object_Vietnam_sample)/27)
-cv <- 
-  split(
-    idx, 
-    ceiling(
-      seq_along(idx) / floor(length(idx) / 27
-      )
-    )
-  ) %>% 
-  bind_rows() %>% 
-  as_tibble() %>% 
-  data.table::setnames(
-    c(
-      "group01","group02","group03","group04","group05","group06","group07","group08","group09","group10",
-      "group11","group12","group13","group14","group15","group16","group17","group18","group19","group20",
-      "group21","group22","group23","group24","group25","group26","group27"
-      
-    )
-  ) %>% 
-  tidyr::pivot_longer(
-    cols = everything(),
-    names_to = "group",
-    values_to = "id"
-  )
-# combine the original data and randomly-allocated group
-object_Vietnam_sample_group <- 
-  object_Vietnam_sample %>% 
-  left_join(
-    cv, 
-    by = "id"
-  )
+# # ---- obtain.address.from.shapefiles ----
+# # read the lon-lat file
+# # object_Vietnam_sample <-
+# #   readRDS("object_Vietnam_lat_lon.rds") %>%
+# #   # add id for random sampling
+# #   dplyr::mutate(
+# #     id = c(1:nrow(.))) %>%
+# #   dplyr::select(-true_false, -area) %>%
+# #   # for faster computation, remove the geometry
+# #   sf::st_drop_geometry()
+# #
+# # Separate the target file into a certain parts randomly
+# # set.seed(123)
+# # obtain group id
+# # NOTE
+# # We need to separate the data without surplus
+# # This time, our data can be divided by an appropriate number (27).
+# idx <- sample(1:nrow(object_Vietnam_sample)/27)
+# cv <-
+#   split(
+#     idx,
+#     ceiling(
+#       seq_along(idx) / floor(length(idx) / 27
+#       )
+#     )
+#   ) %>%
+#   bind_rows() %>%
+#   as_tibble() %>%
+#   data.table::setnames(
+#     c(
+#       "group01","group02","group03","group04","group05","group06","group07","group08","group09","group10",
+#       "group11","group12","group13","group14","group15","group16","group17","group18","group19","group20",
+#       "group21","group22","group23","group24","group25","group26","group27"
 # 
-# setting for furrr package
-plan(multisession)
+#     )
+#   ) %>%
+#   tidyr::pivot_longer(
+#     cols = everything(),
+#     names_to = "group",
+#     values_to = "id"
+#   )
+# # combine the original data and randomly-allocated group
+# object_Vietnam_sample_group <-
+#   object_Vietnam_sample %>%
+#   left_join(
+#     cv,
+#     by = "id"
+#   )
+# #
+# # setting for furrr package
+# plan(multisession)
 # # obtain provinces' name by point
 # # 01
 # object_Vietnam_address_01 <- object_Vietnam_sample_group %>%filter(group == "group01") %>% dplyr::mutate(area_info = furrr::future_map2(.x = lon,.y = lat, ~ find_city(sp_polygon = shp_Vietnam, lon = .x, lat = .y))) %>%tibble()
@@ -318,62 +308,171 @@ plan(multisession)
 # saveRDS(object_Vietnam_address_27,"object_Vietnam_address_27.rds")
 # gc()
 # gc()
+# 
+# # ---- make.address.geometry.file ----
+# # merge the 27 of address files altogether
+# object_Vietnam_address <-
+#   # obtain path list of the separated address file
+#   list.files(path = "./address", pattern = "*.rds") %>%
+#   # add strings to make complete paths
+#   paste0("./address/",.) %>%
+#   # read the target files listed above
+#   purrr::map_df(
+#     .,
+#     readRDS
+#   ) %>%
+#   # rows containing NA (lgl[1]) list
+#   # if the variable named "area_info" contains NA, it will not be "tibble" but "lgl".
+#   # Using the characteristics, we remove the list sorely with NA.
+#   dplyr::filter(
+#     map_lgl(
+#       area_info,
+#       is_tibble
+#     )
+#   ) %>%
+#   # bind the lists containing address
+#   mutate(
+#     areainfo = dplyr::bind_rows(.$area_info)
+#   ) %>%
+#   # pick up necessary info
+#   mutate(
+#     province_code = areainfo$province_code,
+#     province_name = areainfo$province_name,
+#     district_code = areainfo$district_code,
+#     district_name = areainfo$district_name
+#   ) %>%
+#   # select necessary variables
+#   select(lon, lat, id, group, province_code, province_name, district_code, district_name)
+# # save the results
+# saveRDS(object_Vietnam_address, "object_Vietnam_address.rds")
+# # save the results as a .csv file
+# # NOTE
+# # The csv file is huge. No apps can open that.
+# readr::write_excel_csv(
+#   object_Vietnam_address,
+#   "object_Vietnam_address.csv"
+# )
+# 
+# # ---- draw.map ----
+# # Final session
+# # read the lat-lon data with geometry
+# object_Vietnam_lat_lon <-
+#   readRDS("object_Vietnam_lat_lon.rds") %>%
+#   dplyr::mutate(
+#     id = c(1:nrow(.))) %>%
+#   dplyr::select(-true_false, -lat, -lon)
+# # read the address data
+# object_Vietnam_address <-
+#   readRDS("object_Vietnam_address.rds")
+# # combine necessary information altogerther
+# # NOTE
+# # information:
+# # lat
+# # lon
+# # area of the building footprint
+# # province and district
+# # geometry (polygon data)
+# object_Vietnam <-
+#   object_Vietnam_lat_lon %>%
+#   dplyr::inner_join(
+#     object_Vietnam_address,
+#     by = "id"
+#     )
+# # save the data
+# # This is what we would like to obtain.
+# # Once we generate this data, we need not to compile previous
+# # code and make this file. 
+# # If you need to compile that, please release the comment out
+# # and implement.
+# saveRDS(object_Vietnam, "object_Vietnam.rds")
+# # 
+# # read the address data
+# object_Vietnam <- readRDS("object_Vietnam.rds")
+# # pick up the address data belonging to the Mekong Delta region
+# object_Mekong <- 
+#   object_Vietnam %>% 
+#   dplyr::filter(
+#     province_name %in% c(
+#       "Đồng Tháp", 
+#       "An Giang", 
+#       "Long An",
+#       "Bạc Liêu", 
+#       "Bến Tre", 
+#       "Cà Mau", 
+#       "Cần Thơ", 
+#       "Hậu Giang", 
+#       "Kiên Giang", 
+#       "Sóc Trăng", 
+#       "Tiền Giang", 
+#       "Trà Vinh", 
+#       "Vĩnh Long"
+#       ))
+# # read a shapefile to draw administrative boudaries
+# map_Mekong <- 
+#   sf::read_sf("./shapefiles/VNM_adm1.shp") %>%
+#   dplyr::filter(
+#     NAME_1 %in% c(
+#       "Đồng Tháp", 
+#       "An Giang", 
+#       "Long An",
+#       "Bạc Liêu", 
+#       "Bến Tre", 
+#       "Cà Mau", 
+#       "Cần Thơ", 
+#       "Hậu Giang", 
+#       "Kiên Giang", 
+#       "Sóc Trăng", 
+#       "Tiền Giang", 
+#       "Trà Vinh", 
+#       "Vĩnh Long"
+#     ))
+# #  
+# # Draw maps 
+# object_Mekong_map <- 
+#   object_Mekong %>% 
+#   ggplot()+
+#   geom_sf(data = map_Mekong, fill = NA, inherit.aes = FALSE, size = 0.1) +
+#   geom_sf(size = 0.01) +
+#   labs(
+#     title = "Map of building footprint in the Mekong Delta region",
+#     subtitle = "We obtained the data from the Microsoft Inc. \n (https://github.com/microsoft/GlobalMLBuildingFootprints#will-there-be-more-data-coming-for-other-geographies)"
+#     ) +
+#   theme_classic() + 
+#   theme(
+#     axis.text = element_text(size = 20)
+#   ) + 
+#   scalebar(
+#     data = object_Mekong,
+#     dist = 50, 
+#     dist_unit = "km",
+#     transform = TRUE,
+#     location = "bottomleft"
+#     ) +
+#   north(
+#     data = object_Mekong,
+#     symbol = 16,
+#     location = "bottomright"
+#     
+#   )
+# # 
+# # save the map with .pdf format
+# # NOTE
+# # Size of the map is huge. It takes long time to display.
+# # When you would like to look at a building, please enlarge.
+# # For size of the buildings, the map is huge. Enlarging the
+# # map, you will be able to find the shape of the building.
+# # At a sight, the buildings looks like mass of dots.
+# ggsave(
+#   "object_Mekong_map.pdf", 
+#   plot = object_Mekong_map, 
+#   width = 500, 
+#   height = 500, 
+#   units = "mm", 
+#   limitsize = FALSE
+#   )
 
-# merge the 27 of address files altogether
-object_Vietnam_address <-
-  # obtain path list of the separated address file
-  list.files(path = "./address", pattern = "*.rds") %>% 
-  # add strings to make complete paths
-  paste0("./address/",.) %>% 
-  # read the target files listed above
-  purrr::map_df(
-    ., 
-    readRDS
-  ) %>% 
-  # rows containing NA (lgl[1]) list
-  # if the variable named "area_info" contains NA, it will not be "tibble" but "lgl".
-  # Using the characteristics, we remove the list sorely with NA.
-  dplyr::filter(
-    map_lgl(
-      area_info, 
-      is_tibble
-    )
-  ) %>% 
-  # bind the lists containing address
-  mutate(
-    areainfo = dplyr::bind_rows(.$area_info)
-  ) %>% 
-  # pick up necessary info
-  mutate(
-    province_code = areainfo$province_code,
-    province_name = areainfo$province_name,
-    district_code = areainfo$district_code,
-    district_name = areainfo$district_name
-  ) %>% 
-  # select necessary variables
-  select(lon, lat, id, group, province_code, province_name, district_code, district_name)
-# save the results
-saveRDS(object_Vietnam_address, "object_Vietnam_address.rds")
-# save the results as a .csv file
-# NOTE
-# The csv file is huge. No apps can open that.
-readr::write_excel_csv(
-  object_Vietnam_address, 
-  "object_Vietnam_address.csv"
-)
-
-# Final session
-# read the lat-lon data with geometry
-object_Vietnam_lat_lon <- 
-  readRDS("object_Vietnam_lat_lon.rds") %>% 
-  dplyr::mutate(
-    id = c(1:nrow(.))) %>%
-  dplyr::select(-true_false, -lat, -lon) 
-object_Vietnam_address <- 
-  readRDS("object_Vietnam_address.rds")
-# read the address data
-object_Vietnam <- 
-  object_Vietnam_lat_lon %>% 
-  inner_join(object_Vietnam_address, by = "id")
-# save
-saveRDS(object_Vietnam, "object_Vietnam.rds")
+#
+##
+### --- END --- ###
+##
+#
