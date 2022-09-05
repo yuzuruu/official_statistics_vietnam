@@ -353,126 +353,130 @@ library(rsample)
 #   "object_Vietnam_address.csv"
 # )
 # 
-# # ---- draw.map ----
-# # Final session
-# # read the lat-lon data with geometry
-# object_Vietnam_lat_lon <-
-#   readRDS("object_Vietnam_lat_lon.rds") %>%
-#   dplyr::mutate(
-#     id = c(1:nrow(.))) %>%
-#   dplyr::select(-true_false, -lat, -lon)
-# # read the address data
-# object_Vietnam_address <-
-#   readRDS("object_Vietnam_address.rds")
-# # combine necessary information altogerther
-# # NOTE
-# # information:
-# # lat
-# # lon
-# # area of the building footprint
-# # province and district
-# # geometry (polygon data)
-# object_Vietnam <-
-#   object_Vietnam_lat_lon %>%
-#   dplyr::inner_join(
-#     object_Vietnam_address,
-#     by = "id"
-#     )
-# # save the data
-# # This is what we would like to obtain.
-# # Once we generate this data, we need not to compile previous
-# # code and make this file. 
-# # If you need to compile that, please release the comment out
-# # and implement.
-# saveRDS(object_Vietnam, "object_Vietnam.rds")
-# # 
-# # read the address data
-# object_Vietnam <- readRDS("object_Vietnam.rds")
-# # pick up the address data belonging to the Mekong Delta region
-# object_Mekong <- 
-#   object_Vietnam %>% 
-#   dplyr::filter(
-#     province_name %in% c(
-#       "Đồng Tháp", 
-#       "An Giang", 
-#       "Long An",
-#       "Bạc Liêu", 
-#       "Bến Tre", 
-#       "Cà Mau", 
-#       "Cần Thơ", 
-#       "Hậu Giang", 
-#       "Kiên Giang", 
-#       "Sóc Trăng", 
-#       "Tiền Giang", 
-#       "Trà Vinh", 
-#       "Vĩnh Long"
-#       ))
-# # read a shapefile to draw administrative boudaries
-# map_Mekong <- 
-#   sf::read_sf("./shapefiles/VNM_adm1.shp") %>%
-#   dplyr::filter(
-#     NAME_1 %in% c(
-#       "Đồng Tháp", 
-#       "An Giang", 
-#       "Long An",
-#       "Bạc Liêu", 
-#       "Bến Tre", 
-#       "Cà Mau", 
-#       "Cần Thơ", 
-#       "Hậu Giang", 
-#       "Kiên Giang", 
-#       "Sóc Trăng", 
-#       "Tiền Giang", 
-#       "Trà Vinh", 
-#       "Vĩnh Long"
-#     ))
-# #  
-# # Draw maps 
-# object_Mekong_map <- 
-#   object_Mekong %>% 
-#   ggplot()+
-#   geom_sf(data = map_Mekong, fill = NA, inherit.aes = FALSE, size = 0.1) +
-#   geom_sf(size = 0.01) +
-#   labs(
-#     title = "Map of building footprint in the Mekong Delta region",
-#     subtitle = "We obtained the data from the Microsoft Inc. \n (https://github.com/microsoft/GlobalMLBuildingFootprints#will-there-be-more-data-coming-for-other-geographies)"
-#     ) +
-#   theme_classic() + 
-#   theme(
-#     axis.text = element_text(size = 20)
-#   ) + 
-#   scalebar(
-#     data = object_Mekong,
-#     dist = 50, 
-#     dist_unit = "km",
-#     transform = TRUE,
-#     location = "bottomleft"
-#     ) +
-#   north(
-#     data = object_Mekong,
-#     symbol = 16,
-#     location = "bottomright"
-#     
-#   )
-# # 
-# # save the map with .pdf format
-# # NOTE
-# # Size of the map is huge. It takes long time to display.
-# # When you would like to look at a building, please enlarge.
-# # For size of the buildings, the map is huge. Enlarging the
-# # map, you will be able to find the shape of the building.
-# # At a sight, the buildings looks like mass of dots.
-# ggsave(
-#   "object_Mekong_map.pdf", 
-#   plot = object_Mekong_map, 
-#   width = 500, 
-#   height = 500, 
-#   units = "mm", 
-#   limitsize = FALSE
-#   )
+# ---- draw.map ----
+# Final session
+# read the lat-lon data with geometry
+object_Vietnam_lat_lon <-
+  readRDS("object_Vietnam_lat_lon.rds") %>%
+  dplyr::mutate(
+    id = c(1:nrow(.))) %>%
+  dplyr::select(-true_false, -lat, -lon)
+# read the address data
+object_Vietnam_address <-
+  readRDS("object_Vietnam_address.rds")
+# combine necessary information altogerther
+# NOTE
+# information:
+# lat
+# lon
+# area of the building footprint
+# province and district
+# geometry (polygon data)
+object_Vietnam <-
+  object_Vietnam_lat_lon %>%
+  dplyr::inner_join(
+    object_Vietnam_address,
+    by = "id"
+    )
+# save the data
+# This is what we would like to obtain.
+# Once we generate this data, we need not to compile previous
+# code and make this file.
+# If you need to compile that, please release the comment out
+# and implement.
+saveRDS(object_Vietnam, "object_Vietnam.rds")
+#
+# read the address data
+object_Vietnam <- readRDS("object_Vietnam.rds")
+# pick up the address data belonging to the Mekong Delta region
+object_Mekong <-
+  object_Vietnam %>%
+  dplyr::filter(
+    province_name %in% c(
+      "Đồng Tháp",
+      "An Giang",
+      "Long An",
+      "Bạc Liêu",
+      "Bến Tre",
+      "Cà Mau",
+      "Cần Thơ",
+      "Hậu Giang",
+      "Kiên Giang",
+      "Sóc Trăng",
+      "Tiền Giang",
+      "Trà Vinh",
+      "Vĩnh Long"
+      ))
+# read a shapefile to draw administrative boudaries
+map_Mekong <-
+  sf::read_sf("./shapefiles/VNM_adm1.shp") %>%
+  dplyr::filter(
+    NAME_1 %in% c(
+      "Đồng Tháp",
+      "An Giang",
+      "Long An",
+      "Bạc Liêu",
+      "Bến Tre",
+      "Cà Mau",
+      "Cần Thơ",
+      "Hậu Giang",
+      "Kiên Giang",
+      "Sóc Trăng",
+      "Tiền Giang",
+      "Trà Vinh",
+      "Vĩnh Long"
+    ))
+#
+# Draw maps
+object_Mekong_map <-
+  object_Mekong %>%
+  ggplot()+
+  geom_sf(data = map_Mekong, fill = NA, inherit.aes = FALSE, size = 0.1) +
+  geom_sf(size = 0.01) +
+  labs(
+    title = "Map of building footprint in the Mekong Delta region",
+    subtitle = "We obtained the data from the Microsoft Inc. \n (https://github.com/microsoft/GlobalMLBuildingFootprints#will-there-be-more-data-coming-for-other-geographies)",
+    x = "Longitude",
+    y = "Latitude"
+    ) +
+  theme_classic() +
+  theme(
+    axis.text = element_text(size = 20),
+    axis.title = element_text(size = 30)
+  ) +
+  scalebar(
+    data = object_Mekong,
+    dist = 50,
+    dist_unit = "km",
+    transform = TRUE,
+    location = "bottomleft"
+    ) +
+  north(
+    data = object_Mekong,
+    symbol = 16,
+    location = "bottomright"
+
+  )
+#
+# save the map with .pdf format
+# NOTE
+# Size of the map is huge. It takes long time to display.
+# When you would like to look at a building, please enlarge.
+# For size of the buildings, the map is huge. Enlarging the
+# map, you will be able to find the shape of the building.
+# At a sight, the buildings looks like mass of dots.
+ggsave(
+  "object_Mekong_map.pdf",
+  plot = object_Mekong_map,
+  width = 500,
+  height = 500,
+  units = "mm",
+  limitsize = FALSE
+  )
 
 #
 ##
 ### --- END --- ###
 ##
 #
+
