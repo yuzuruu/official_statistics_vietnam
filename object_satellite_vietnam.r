@@ -15,6 +15,10 @@ library(sf)
 library(ggsn)
 library(furrr)
 library(rsample)
+# set concurrent computing plan
+# multisession: use CPUs as many as possible
+plan(multisession)
+
 # 
 # # ---- read.data ----
 # # read object data
@@ -38,61 +42,61 @@ library(rsample)
 # # We thank following links.
 # # https://qiita.com/nozma/items/808bce2f496eabd50ff1
 # # https://qiita.com/uri/items/69b2c05f7b3a21d3aad3
-# find_city <- function(sp_polygon = df, lon = lon, lat = lat){
-#   # find a polygon containing a certain pair of lon / lat
-#   which.row <-
-#     sf::st_contains(
-#       sp_polygon,
-#       sf::st_point(
-#         c(
-#           lon,
-#           lat
-#         )
-#       ),
-#       sparse = FALSE
-#     ) %>%
-#     grep(TRUE, .)
-#   # If not, leave a warning message
-#   if(identical(which.row, integer(0)) == TRUE) {
-#     # message("Assigned coordinates are not included at all.")
-#     return(NA)
-#     # If exist, obtain information of coordinates
-#   } else {
-#     geos <-
-#       sp_polygon[which.row, ] %>%
-#       # transform from factor to character
-#       dplyr::mutate_if(
-#         is.factor,
-#         as.character
-#       ) %>%
-#       # obtain necessary part of the shapefile
-#       dplyr::mutate_at(
-#         dplyr::vars(NAME_1),
-#         dplyr::funs(
-#           dplyr::if_else(
-#             # Is it NA?
-#             condition = is.na(.),
-#             # if NA, return blank
-#             true = "",
-#             # if not, use it
-#             false = .
-#           )
-#         )
-#       )
-#     # make a dataset of administrative boundaries
-#     # Names and IDs are obtained from shapefiles
-#     res <- tibble::data_frame(
-#       province_code = geos$ID_1,
-#       district_code = geos$ID_2,
-#       # town_code = geos$ID_3,
-#       province_name = geos$NAME_1,
-#       district_name = geos$VARNAME_2,
-#       # town_name = geos$NAME_3
-#     )
-#     # return results
-#     return(res)
-#   }
-# }
+find_city <- function(sp_polygon = df, lon = lon, lat = lat){
+  # find a polygon containing a certain pair of lon / lat
+  which.row <-
+    sf::st_contains(
+      sp_polygon,
+      sf::st_point(
+        c(
+          lon,
+          lat
+        )
+      ),
+      sparse = FALSE
+    ) %>%
+    grep(TRUE, .)
+  # If not, leave a warning message
+  if(identical(which.row, integer(0)) == TRUE) {
+    # message("Assigned coordinates are not included at all.")
+    return(NA)
+    # If exist, obtain information of coordinates
+  } else {
+    geos <-
+      sp_polygon[which.row, ] %>%
+      # transform from factor to character
+      dplyr::mutate_if(
+        is.factor,
+        as.character
+      ) %>%
+      # obtain necessary part of the shapefile
+      dplyr::mutate_at(
+        dplyr::vars(NAME_1),
+        dplyr::funs(
+          dplyr::if_else(
+            # Is it NA?
+            condition = is.na(.),
+            # if NA, return blank
+            true = "",
+            # if not, use it
+            false = .
+          )
+        )
+      )
+    # make a dataset of administrative boundaries
+    # Names and IDs are obtained from shapefiles
+    res <- tibble::data_frame(
+      province_code = geos$ID_1,
+      district_code = geos$ID_2,
+      # town_code = geos$ID_3,
+      province_name = geos$NAME_1,
+      district_name = geos$VARNAME_2,
+      # town_name = geos$NAME_3
+    )
+    # return results
+    return(res)
+  }
+}
 # 
 # # ---- make.area.data ----
 # #  Calculate area of objects from the .geojson file
@@ -353,44 +357,44 @@ library(rsample)
 #   "object_Vietnam_address.csv"
 # )
 # 
-# ---- draw.map ----
-# Final session
-# read the lat-lon data with geometry
-object_Vietnam_lat_lon <-
-  readRDS("object_Vietnam_lat_lon.rds") %>%
-  dplyr::mutate(
-    id = c(1:nrow(.))) %>%
-  dplyr::select(-true_false, -lat, -lon)
-# read the address data
-object_Vietnam_address <-
-  readRDS("object_Vietnam_address.rds")
-# combine necessary information altogerther
-# NOTE
-# information:
-# lat
-# lon
-# area of the building footprint
-# province and district
-# geometry (polygon data)
-object_Vietnam <-
-  object_Vietnam_lat_lon %>%
-  dplyr::inner_join(
-    object_Vietnam_address,
-    by = "id"
-    )
-# save the data
-# This is what we would like to obtain.
-# Once we generate this data, we need not to compile previous
-# code and make this file.
-# If you need to compile that, please release the comment out
-# and implement.
-saveRDS(object_Vietnam, "object_Vietnam.rds")
-#
-# read the address data
-object_Vietnam <- readRDS("object_Vietnam.rds")
-# pick up the address data belonging to the Mekong Delta region
+# # ---- draw.map ----
+# # Final session
+# # read the lat-lon data with geometry
+# object_Vietnam_lat_lon <-
+#   readRDS("object_Vietnam_lat_lon.rds") %>%
+#   dplyr::mutate(
+#     id = c(1:nrow(.))) %>%
+#   dplyr::select(-true_false, -lat, -lon)
+# # read the address data
+# object_Vietnam_address <-
+#   readRDS("object_Vietnam_address.rds")
+# # combine necessary information altogerther
+# # NOTE
+# # information:
+# # lat
+# # lon
+# # area of the building footprint
+# # province and district
+# # geometry (polygon data)
+# object_Vietnam <-
+#   object_Vietnam_lat_lon %>%
+#   dplyr::inner_join(
+#     object_Vietnam_address,
+#     by = "id"
+#     )
+# # save the data
+# # This is what we would like to obtain.
+# # Once we generate this data, we need not to compile previous
+# # code and make this file.
+# # If you need to compile that, please release the comment out
+# # and implement.
+# saveRDS(object_Vietnam, "object_Vietnam.rds")
+# #
+# # read the address data
+# object_Vietnam <- readRDS("object_Vietnam.rds")
+# # pick up the address data belonging to the Mekong Delta region
 object_Mekong <-
-  object_Vietnam %>%
+  readRDS("object_Vietnam.rds") %>%
   dplyr::filter(
     province_name %in% c(
       "Đồng Tháp",
@@ -408,71 +412,96 @@ object_Mekong <-
       "Vĩnh Long"
       ))
 # read a shapefile to draw administrative boudaries
-map_Mekong <-
-  sf::read_sf("./shapefiles/VNM_adm1.shp") %>%
-  dplyr::filter(
-    NAME_1 %in% c(
-      "Đồng Tháp",
-      "An Giang",
-      "Long An",
-      "Bạc Liêu",
-      "Bến Tre",
-      "Cà Mau",
-      "Cần Thơ",
-      "Hậu Giang",
-      "Kiên Giang",
-      "Sóc Trăng",
-      "Tiền Giang",
-      "Trà Vinh",
-      "Vĩnh Long"
-    ))
-#
-# Draw maps
-object_Mekong_map <-
-  object_Mekong %>%
-  ggplot()+
-  geom_sf(data = map_Mekong, fill = NA, inherit.aes = FALSE, size = 0.1) +
-  geom_sf(size = 0.01) +
-  labs(
-    title = "Map of building footprint in the Mekong Delta region",
-    subtitle = "We obtained the data from the Microsoft Inc. \n (https://github.com/microsoft/GlobalMLBuildingFootprints#will-there-be-more-data-coming-for-other-geographies)",
-    x = "Longitude",
-    y = "Latitude"
-    ) +
-  theme_classic() +
-  theme(
-    axis.text = element_text(size = 20),
-    axis.title = element_text(size = 30)
-  ) +
-  scalebar(
-    data = object_Mekong,
-    dist = 50,
-    dist_unit = "km",
-    transform = TRUE,
-    location = "bottomleft"
-    ) +
-  north(
-    data = object_Mekong,
-    symbol = 16,
-    location = "bottomright"
+# map_Mekong <-
+#   sf::read_sf("./shapefiles/VNM_adm1.shp") %>%
+#   dplyr::filter(
+#     NAME_1 %in% c(
+#       "Đồng Tháp",
+#       "An Giang",
+#       "Long An",
+#       "Bạc Liêu",
+#       "Bến Tre",
+#       "Cà Mau",
+#       "Cần Thơ",
+#       "Hậu Giang",
+#       "Kiên Giang",
+#       "Sóc Trăng",
+#       "Tiền Giang",
+#       "Trà Vinh",
+#       "Vĩnh Long"
+#     ))
+# #
+# # Draw maps
+# object_Mekong_map <-
+#   object_Mekong %>%
+#   ggplot()+
+#   geom_sf(data = map_Mekong, fill = NA, inherit.aes = FALSE, size = 0.1) +
+#   geom_sf(size = 0.01) +
+#   labs(
+#     title = "Map of building footprint in the Mekong Delta region",
+#     subtitle = "We obtained the data from the Microsoft Inc. \n (https://github.com/microsoft/GlobalMLBuildingFootprints#will-there-be-more-data-coming-for-other-geographies)",
+#     x = "Longitude",
+#     y = "Latitude"
+#     ) +
+#   theme_classic() +
+#   theme(
+#     axis.text = element_text(size = 20),
+#     axis.title = element_text(size = 30)
+#   ) +
+#   scalebar(
+#     data = object_Mekong,
+#     dist = 50,
+#     dist_unit = "km",
+#     transform = TRUE,
+#     location = "bottomleft"
+#     ) +
+#   north(
+#     data = object_Mekong,
+#     symbol = 16,
+#     location = "bottomright"
+# 
+#   )
+# #
+# # save the map with .pdf format
+# # NOTE
+# # Size of the map is huge. It takes long time to display.
+# # When you would like to look at a building, please enlarge.
+# # For size of the buildings, the map is huge. Enlarging the
+# # map, you will be able to find the shape of the building.
+# # At a sight, the buildings looks like mass of dots.
+# ggsave(
+#   "object_Mekong_map.pdf",
+#   plot = object_Mekong_map,
+#   width = 500,
+#   height = 500,
+#   units = "mm",
+#   limitsize = FALSE
+#   )
 
+
+object_Mekong_summary <- 
+  object_Mekong %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::group_by(province_name) %>% 
+  dplyr::summarise(
+    N = n(),
+    Min. = min(area),
+    Mean = mean(area),
+    Median = median(area),
+    Max. = max(area),
+    SD = sd(area)
   )
-#
-# save the map with .pdf format
-# NOTE
-# Size of the map is huge. It takes long time to display.
-# When you would like to look at a building, please enlarge.
-# For size of the buildings, the map is huge. Enlarging the
-# map, you will be able to find the shape of the building.
-# At a sight, the buildings looks like mass of dots.
-ggsave(
-  "object_Mekong_map.pdf",
-  plot = object_Mekong_map,
-  width = 500,
-  height = 500,
-  units = "mm",
-  limitsize = FALSE
-  )
+
+object_Mekong_top100 <- 
+  object_Mekong %>% 
+  sf::st_drop_geometry() %>% 
+  dplyr::group_by(province_name) %>% 
+  dplyr::arrange(desc(area)) %>% 
+  slice(1:100)
+readr::write_excel_csv(
+  object_Mekong_top100,
+  "object_Mekong_top100.csv"
+)
 
 #
 ##
@@ -480,3 +509,180 @@ ggsave(
 ##
 #
 
+# ---- analyse.specific.area ----
+# NOTE
+# Once we finished obtaining adresses, we need not
+# to run the following code.
+# comment out when not in use.
+# The Mekong Delta region
+# make shapefiles of the target area
+shp_Mekong <-
+  sf::st_read(
+    "./shapefiles/VNM_adm3.shp",
+    options = "ENCODING=UTF-8",
+    stringsAsFactors=FALSE
+  ) %>%
+  dplyr::mutate_if(
+    is.character,
+    enc2utf8
+  ) %>% 
+  dplyr::filter(
+      NAME_1 %in% c(
+        "Đồng Tháp",
+        "An Giang",
+        "Long An",
+        "Bạc Liêu",
+        "Bến Tre",
+        "Cà Mau",
+        "Cần Thơ",
+        "Hậu Giang",
+        "Kiên Giang",
+        "Sóc Trăng",
+        "Tiền Giang",
+        "Trà Vinh",
+        "Vĩnh Long"
+      )
+      )
+
+# read ****** data
+object_Vietnam_sample_group_mekong <-
+  # read data
+  readRDS(
+    "object_Vietnam_sample_group.rds"
+  ) %>%
+  # fix target area roughly
+  # We can obtain the condition using Google Maps
+  dplyr::filter(
+    lat < 11.032
+    ) 
+# This group is just for "for loop". The number includes
+# no meaning.
+group_2803 <-
+  levels(
+    factor(
+      object_Vietnam_sample_group_mekong$group
+      )
+  )
+# obtain address by group and object induvidually
+object_Vietnam_sample_group_address_mekong <-
+  for(i in 1:length(group_2803)){
+    target <- filter(
+      object_Vietnam_sample_group_mekong,
+      group == group_2803[i]
+    )
+    target_address <-
+      target %>%
+      dplyr::mutate(
+        area_info = furrr::future_map2_dfr(
+          .x = lon,
+          .y = lat,
+          ~ try(
+            find_city(
+              sp_polygon = shp_Mekong,
+              lon = .x,
+              lat = .y
+            )
+          )
+        )
+      ) %>%
+      tibble()
+    # save the computation results
+    write_excel_csv(
+      # fix target column
+      bind_cols(
+        id = target_address$id,
+        province_code = target_address$area_info$province_code,
+        province_name = target_address$area_info$province_name,
+        district_code = target_address$area_info$district_code,
+        district_name = target_address$area_info$district_name,
+        town_code = target_address$area_info$town_code,
+        town_name = target_address$area_info$town_name
+      ) %>%
+        # remove rows containing NA
+        na.omit(),
+      file = paste0("target_address_mekong/",target_address$group[1], ".csv")
+    )
+    # for larger data, enable the gc() function
+    # gc()
+    # gc()
+  }
+# make a list of generated csv files
+# target_file_list <- 
+#   dir(
+#     path = "target_address_camau", 
+#     pattern = "*.csv"
+#   )
+# combine altoghether
+# Reference:
+# https://qiita.com/Ringa_hyj/items/434e3a6794bb7ed8ee14
+# target_address_camau_combined <- 
+#   vroom::vroom(
+#     paste0(
+#       "target_address_camau/", 
+#       target_file_list, 
+#       sep = ""
+#     )
+#   ) %>% 
+#   dplyr::filter(province_name == "Cà Mau")
+# NOTE
+# The code above works slowly. It is just for education.
+# DO NOT USE.
+# target_address_camau_combined <- 
+#   target_file_list %>%
+#   purrr::map(
+#     ~
+#       read_csv(
+#         paste0(
+#           "target_address_camau/", 
+#           target_file_list, 
+#           sep = ""
+#         )
+#       )
+#   ) %>%
+#   purrr::reduce(full_join, by = c("id", "province_code", "province_name", "district_code", "district_name", "town_code", "town_name"))
+# save the combined csv files for safe use
+# readr::write_excel_csv(
+#   target_address_camau_combined,
+#   "target_address_camau_combined.csv"
+#   )
+# join in the address file and geometry
+# object_Vietnam_camau <-
+#   readRDS("object_Vietnam_lat_lon.rds") %>%
+#   dplyr::mutate(
+#       id = c(1:nrow(.))
+#       ) %>% 
+#   dplyr::inner_join(
+#     target_address_camau_combined,
+#     by = "id"
+#   ) %>% 
+#   dplyr::select(
+#     id, 
+#     area, 
+#     lon, 
+#     lat,
+#     province_code,
+#     province_name,
+#     district_code,
+#     district_name,
+#     town_code,
+#     town_name,
+#     geometry
+#     )
+# save the file
+# Completed!!
+# saveRDS(
+#   object_Vietnam_mekong,
+#   "object_Vietnam_mekong.rds"
+# )
+# 
+# hoge <- 
+#   sf::read_sf("shapefile_footprint_camau/object_Vietnam_camau.shp") 
+# hogehoge <- 
+#   ggplot(
+#     hoge[c(1:347129),]
+#   )+
+#   geom_sf(aes(fill = area),lwd = 0) +
+#   scale_fill_iridescent() +
+#   theme_void() 
+# ggsave("hoge.pdf", plot = hogehoge, width = 5000, height = 5000, units = "mm", limitsize = FALSE)
+# 
